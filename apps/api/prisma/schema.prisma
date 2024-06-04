@@ -11,11 +11,176 @@ datasource db {
 }
 
 model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  name       String
+  code       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("samples") // if you want to use snake_case format
+}
+
+model User {
+  id            Int     @id @default(autoincrement())
+  user_name     String
+  user_email    String  @unique
+  user_photo    String?
+  user_password String
+  is_verified   Boolean @default(false)
+  role          String
+
+  Address   Address[]
+  Cart      Cart[]
+  Warehouse Warehouse?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Address {
+  id          Int    @id @default(autoincrement())
+  street      String
+  postal_code Int
+  city        String
+  country     String
+
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+
+  user_id     Int
+  user        User         @relation(fields: [user_id], references: [id])
+  Transaction Transaction?
+
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  CartItem   CartItem[]
+}
+
+model Transaction {
+  id                Int      @id @default(autoincrement())
+  status            String
+  payment_method    String
+  confirmation_date DateTime
+  final_price       Float
+  destination_id    Int
+
+  warehouse_id Int
+  warehouse    Warehouse @relation(fields: [warehouse_id], references: [id])
+
+  cart_id Int  @unique
+  cart    Cart @relation(fields: [cart_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Warehouse {
+  id                    Int    @id @default(autoincrement())
+  warehouse_name        String
+  warehouse_longitude   String
+  warehouse_langitude   String
+  warehouse_street      String
+  warehouse_postal_code Int
+  warehouse_city        String
+  warehouse_country     String
+
+  warehouse_admin_id Int              @unique
+  user               User             @relation(fields: [warehouse_admin_id], references: [id])
+  Transaction        Transaction[]
+  WarehouseStock     WarehouseStock[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model MutationHistory {
+  id                Int    @id @default(autoincrement())
+  from_warehouse_id Int
+  to_warehouse_id   Int
+  book_id           Int
+  quantity          Int
+  status            Int
+  type              String
+  message           String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Book {
+  id                  Int    @id @default(autoincrement())
+  book_name           String
+  book_description    String
+  book_author         String
+  book_publisher      String
+  book_published_year Int
+  book_category_id    Int
+  book_ISBN           String
+  book_price          Int
+  book_weight         Int
+
+  BookImage      BookImage[]
+  bookCategory   BookCategory     @relation(references: [id], fields: [book_category_id])
+  WarehouseStock WarehouseStock[]
+
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  CartItem   CartItem[]
+}
+
+model BookImage {
+  id         Int    @id @default(autoincrement())
+  book_image String
+
+  book_id Int
+  book    Book @relation(fields: [book_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model BookCategory {
+  id                 Int    @id @default(autoincrement())
+  book_category_name String
+
+  Book Book[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model WarehouseStock {
+  id Int @id @default(autoincrement())
+
+  book_id      Int
+  warehouse_id Int
+  stockQty     Int
+
+  book      Book      @relation(fields: [book_id], references: [id])
+  warehouse Warehouse @relation(fields: [warehouse_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model CartItem {
+  id           Int   @id @default(autoincrement())
+  cart_id      Int
+  book_id      Int
+  quantity     Int
+  total_price  Float
+  total_weight Float
+
+  cart Cart @relation(fields: [cart_id], references: [id])
+  book Book @relation(fields: [book_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import express, {
   json,
   urlencoded,
@@ -10,6 +11,8 @@ import express, {
 import cors from 'cors';
 import { PORT } from './config';
 import { SampleRouter } from './routers/sample.router';
+import { ProductCategoryRouter } from './routers/productCategory.router';
+import { ErrorMiddleware } from './middlewares/error.middleware';
 
 export default class App {
   private app: Express;
@@ -38,26 +41,30 @@ export default class App {
     });
 
     // error
-    this.app.use(
-      (err: Error, req: Request, res: Response, next: NextFunction) => {
-        if (req.path.includes('/api/')) {
-          console.error('Error : ', err.stack);
-          res.status(500).send('Error !');
-        } else {
-          next();
-        }
-      },
-    );
+    // this.app.use(
+    //   (err: Error, req: Request, res: Response, next: NextFunction) => {
+    //     if (req.path.includes('/api/')) {
+    //       console.error('Error : ', err.stack);
+    //       res.status(500).send('Error !');
+    //     } else {
+    //       next();
+    //     }
+    //   },
+    // );
+    this.app.use(ErrorMiddleware);
   }
 
   private routes(): void {
     const sampleRouter = new SampleRouter();
+    const productCategoryRouter = new ProductCategoryRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
     });
 
-    this.app.use('/samples', sampleRouter.getRouter());
+    this.app.use('/api/samples', sampleRouter.getRouter());
+
+    this.app.use('/api/product-category', productCategoryRouter.getRouter());
   }
 
   public start(): void {

@@ -3,6 +3,7 @@ import Container, { Service } from 'typedi';
 import { checkCartItem } from '@/interfaces/checkCartItem.interfaces';
 import { createCartItem } from '@/interfaces/createCartItem.interfaces';
 import { addCartItem } from '@/interfaces/addCart.interfaces';
+import { updateCartItem } from '@/interfaces/updateCartItem.interfaces';
 
 @Service()
 export class CartItemService {
@@ -33,6 +34,16 @@ export class CartItemService {
   public addCartItemService = async (param: addCartItem): Promise<void> => {
     try {
       await this.cartItemQueries.addCartItemQuery(param);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public updateCartItemService = async (
+    param: updateCartItem,
+  ): Promise<void> => {
+    try {
+      await this.cartItemQueries.updateCartItemQuery(param);
     } catch (error) {
       throw error;
     }

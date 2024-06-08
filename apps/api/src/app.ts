@@ -12,6 +12,7 @@ import cors from 'cors';
 import { PORT } from './config';
 import { SampleRouter } from './routers/sample.router';
 import { ProductCategoryRouter } from './routers/productCategory.router';
+import { CartRouter } from './routers/cart.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
 import express, { Application } from 'express';
 import { API_PORT } from './config';
@@ -64,6 +65,7 @@ export default class App {
   private routes(): void {
     const sampleRouter = new SampleRouter();
     const productCategoryRouter = new ProductCategoryRouter();
+    const addToCartRouter = new CartRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -72,6 +74,7 @@ export default class App {
     this.app.use('/api/samples', sampleRouter.getRouter());
 
     this.app.use('/api/product-category', productCategoryRouter.getRouter());
+    this.app.use('/api/cart', addToCartRouter.getRouter());
   }
 
   public start(): void {

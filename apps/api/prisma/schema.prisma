@@ -14,7 +14,7 @@ model Sample {
   id         Int      @id @default(autoincrement())
   name       String
   code       String   @unique
-  created_at DateTime @default(now())is_verified
+  created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@map("samples") // if you want to use snake_case format
@@ -26,7 +26,7 @@ model User {
   user_email    String  @unique
   user_photo    String?
   user_password String?
-     Boolean @default(false)
+  is_verified  Boolean @default(false)
   role          String
 
   Address   Address[]

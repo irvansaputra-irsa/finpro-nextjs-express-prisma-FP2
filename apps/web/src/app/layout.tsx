@@ -4,6 +4,7 @@ import './globals.css';
 import { ChakraProvider } from '@chakra-ui/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import StoreProvider from './StoreProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,9 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ChakraProvider>
-          <Navbar />
-          {children}
-          <Footer />
+          <StoreProvider>
+            <Navbar />
+            {children}
+            <Footer />
+          </StoreProvider>
         </ChakraProvider>
       </body>
     </html>

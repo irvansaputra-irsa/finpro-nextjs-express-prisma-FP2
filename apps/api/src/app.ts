@@ -7,6 +7,7 @@ import express, {
   Response,
   NextFunction,
   Router,
+  Application,
 } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
@@ -14,13 +15,8 @@ import { SampleRouter } from './routers/sample.router';
 import { ProductCategoryRouter } from './routers/productCategory.router';
 import { CartRouter } from './routers/cart.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
-import express, { Application } from 'express';
 import { API_PORT } from './config';
-
-import authRouter from './routes/auth.route';
-// import userRouter from './routes/user.route';
-import { ErrorMiddleware } from './middlewares/error.middleware';
-import cors from 'cors';
+import authRouter from './routers/auth.router';
 
 export default class App {
   private app: Express;
@@ -84,8 +80,6 @@ export default class App {
   }
 }
 
-
-
 class Server {
   public app: Application;
   private port: number;
@@ -121,4 +115,4 @@ class Server {
 
 const server = new Server();
 server.listen();
-``
+``;

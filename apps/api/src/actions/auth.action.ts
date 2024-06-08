@@ -9,13 +9,13 @@ import { sign } from 'jsonwebtoken';
 
 const registerAction = async (data: User): Promise<User> => {
   try {
-    const check = await getUserByEmailQuery(data.email || '');
+    const check = await getUserByEmailQuery(data.user_email || '');
 
     if (check) throw new Error('user already exist');
 
     const salt = await genSalt(10);
 
-    const hashPass = await hash(data.password || '', salt);
+    const hashPass = await hash(data.user_password || '', salt);
 
     const user = await registerQuery(data, hashPass);
 
@@ -33,17 +33,17 @@ const loginAction = async (data: Auth) => {
 
     // if (data.password === user.password)
 
-    const isValid = await compare(data.password, user.password || '');
+    const isValid = await compare(data.password, user.user_password || '');
 
     if (!isValid) {
       throw new Error('password is wrong');
     } else {
-      console.log(`Welcome, ${user.email}`);
+      console.log(`Welcome, ${user.user_email}`);
     }
 
     const payload = {
       userId: user.id,
-      email: user.email,
+      email: user.user_email,
     };
     const token = sign(payload, String(API_KEY), { expiresIn: '1h' });
     console.log(token);

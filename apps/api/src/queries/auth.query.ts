@@ -14,13 +14,9 @@ const registerQuery = async (data: User, pass: string): Promise<User> => {
       try {
         const user = await prisma.user.create({
           data: {
-            email: data.email,
-            password: pass,
-            role: {
-              connect: {
-                name: 'super_admin',
-              },
-            },
+            user_email: data.user_email,
+            user_password: pass,
+            role: 'string',
           },
         });
         // const pathOldImage = path.join(__dirname, "../public", avatar)
@@ -37,13 +33,13 @@ const registerQuery = async (data: User, pass: string): Promise<User> => {
 
         const compiledTemplate = handlebars.compile(templateSource);
         const html = compiledTemplate({
-          email: user.email,
+          user_email: true,
           url: urlVerify,
         });
 
         await transporter.sendMail({
           from: 'sender address',
-          to: user.email || '',
+          to: user.user_email || '',
           subject: 'welcome to tokopedya',
           html,
         });
@@ -64,14 +60,10 @@ const loginQuery = async (data: Auth) => {
     const user = await prisma.user.findUnique({
       select: {
         id: true,
-        email: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
+        user_email: true,
+        role: true,
       },
-      where: { email: data.email, password: data.password },
+      where: { user_email: data.email, user_password: data.password },
     });
 
     return user;

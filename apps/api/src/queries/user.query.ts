@@ -6,11 +6,8 @@ const prisma = new PrismaClient();
 const getUserByEmailQuery = async (email: string) => {
   try {
     const user = await prisma.user.findUnique({
-      include: {
-        role: true,
-      },
       where: {
-        email,
+        user_email: email,
       },
     });
 

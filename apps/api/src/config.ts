@@ -11,4 +11,8 @@ config({ path: resolve(__dirname, `../${envFile}.local`), override: true });
 // Load all environment variables from .env file
 
 export const PORT = process.env.PORT || 8000;
+export const API_PORT = process.env.PORT || 8000;
 export const DATABASE_URL = process.env.DATABASE_URL || '';
+export const API_KEY = process.env.API_KEY || '';
+export const NODEMAILER_EMAIL = process.env.NODEMAILER_EMAIL || '';
+export const NODEMAILER_PASS = process.env.NODEMAILER_PASS || '';

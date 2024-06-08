@@ -13,6 +13,13 @@ import { PORT } from './config';
 import { SampleRouter } from './routers/sample.router';
 import { ProductCategoryRouter } from './routers/productCategory.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
+import express, { Application } from 'express';
+import { API_PORT } from './config';
+
+import authRouter from './routes/auth.route';
+// import userRouter from './routes/user.route';
+import { ErrorMiddleware } from './middlewares/error.middleware';
+import cors from 'cors';
 
 export default class App {
   private app: Express;
@@ -73,3 +80,42 @@ export default class App {
     });
   }
 }
+
+
+
+class Server {
+  public app: Application;
+  private port: number;
+
+  constructor() {
+    this.app = express();
+    this.port = Number(API_PORT) || 8000;
+    this.initializeMiddlewares();
+    this.initializeRoutes();
+    this.initializeErrorHandling();
+  }
+
+  private initializeMiddlewares(): void {
+    this.app.use(express.json());
+    this.app.use(cors());
+  }
+
+  private initializeRoutes(): void {
+    this.app.use('/auth', authRouter);
+    // this.app.use('/users', userRouter);
+  }
+
+  private initializeErrorHandling(): void {
+    this.app.use(ErrorMiddleware);
+  }
+
+  public listen(): void {
+    this.app.listen(this.port, () => {
+      console.log(`Server started on port ${this.port}`);
+    });
+  }
+}
+
+const server = new Server();
+server.listen();
+``

@@ -1,0 +1,8 @@
+[
+  {
+    "name": "super_admin",
+    "email": "admin@gmail.com",
+    "password": "finpro1",
+    "role": "super_admin"
+  }
+]

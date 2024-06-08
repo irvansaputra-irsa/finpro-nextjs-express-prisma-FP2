@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development ts-node-dev -r tsconfig-paths/register src/index.ts",
+    "dev": "cross-env NODE_ENV=development ts-node-dev -r tsconfig-paths/register src/app.ts",
     "build": "tsc && tsc-alias",
     "serve": "cross-env NODE_ENV=production node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -22,12 +22,28 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typedi": "^0.10.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "jsonwebtoken": "^9.0.2",
+    "handlebars": "^4.7.8",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.13",
+    "bcrypt": "^5.1.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "prisma": "^5.7.1",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/multer": "^1.4.11",
+    "@types/nodemailer": "^6.4.15",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.13",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   }
 }

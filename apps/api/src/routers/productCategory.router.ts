@@ -16,6 +16,22 @@ export class ProductCategoryRouter {
       '/',
       this.productCategoryController.createProductCategoryController,
     );
+    this.router.get(
+      '/',
+      this.productCategoryController.getProductCategoriesController,
+    );
+    this.router.patch(
+      '/:id',
+      this.productCategoryController.updateProductCategoryController,
+    );
+    this.router.delete(
+      '/:id',
+      this.productCategoryController.deleteProductCategoryController,
+    );
+    this.router.get(
+      '/:id',
+      this.productCategoryController.getProductCategoryController,
+    );
   }
 
   getRouter(): Router {

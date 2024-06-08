@@ -13,6 +13,7 @@ import { PORT } from './config';
 import { SampleRouter } from './routers/sample.router';
 import { ProductCategoryRouter } from './routers/productCategory.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
+import { ProductRouter } from './routers/product.router';
 
 export default class App {
   private app: Express;
@@ -57,6 +58,7 @@ export default class App {
   private routes(): void {
     const sampleRouter = new SampleRouter();
     const productCategoryRouter = new ProductCategoryRouter();
+    const productRouter = new ProductRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -65,6 +67,7 @@ export default class App {
     this.app.use('/api/samples', sampleRouter.getRouter());
 
     this.app.use('/api/product-category', productCategoryRouter.getRouter());
+    this.app.use('/api/product', productRouter.getRouter());
   }
 
   public start(): void {

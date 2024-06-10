@@ -10,11 +10,14 @@ import express, {
 } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
+import { AddressRouter } from './routers/address.router';
 import { SampleRouter } from './routers/sample.router';
 import { ProductCategoryRouter } from './routers/productCategory.router';
 import { CartRouter } from './routers/cart.router';
+import { CartItemRouter } from './routers/cartItem.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
 import { ProductRouter } from './routers/product.router';
+import { AuthRouter } from './routers/auth.router';
 
 export default class App {
   private app: Express;
@@ -61,6 +64,9 @@ export default class App {
     const productCategoryRouter = new ProductCategoryRouter();
     const productRouter = new ProductRouter();
     const addToCartRouter = new CartRouter();
+    const addressRouter = new AddressRouter();
+    const cartItemRouter = new CartItemRouter();
+    const authRouter = new AuthRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -71,6 +77,9 @@ export default class App {
     this.app.use('/api/product-category', productCategoryRouter.getRouter());
     this.app.use('/api/product', productRouter.getRouter());
     this.app.use('/api/cart', addToCartRouter.getRouter());
+    this.app.use('/api/address', addressRouter.getRouter());
+    this.app.use('/api/cart-item', cartItemRouter.getRouter());
+    this.app.use('/api/auth', authRouter.getRouter());
   }
 
   public start(): void {

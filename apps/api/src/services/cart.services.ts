@@ -1,6 +1,7 @@
 import Container, { Service } from 'typedi';
 import { CartQuery } from '@/queries/cart.queries';
 import { getAliveCart } from '@/interfaces/getAliveCart.interfaces';
+import { allCartItem } from '@/interfaces/allCartItem.interfaces';
 
 @Service()
 export class CartService {

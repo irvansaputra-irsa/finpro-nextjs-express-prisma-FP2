@@ -62,12 +62,9 @@ export default class App {
     const sampleRouter = new SampleRouter();
     const productCategoryRouter = new ProductCategoryRouter();
     const addToCartRouter = new CartRouter();
-<<<<<<< feature/SCRUM-23
     const addressRouter = new AddressRouter();
     const cartItemRouter = new CartItemRouter();
-=======
     const authRouter = new AuthRouter();
->>>>>>> develop
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -77,12 +74,9 @@ export default class App {
 
     this.app.use('/api/product-category', productCategoryRouter.getRouter());
     this.app.use('/api/cart', addToCartRouter.getRouter());
-<<<<<<< feature/SCRUM-23
     this.app.use('/api/address', addressRouter.getRouter());
     this.app.use('/api/cart-item', cartItemRouter.getRouter());
-=======
     this.app.use('/api/auth', authRouter.getRouter());
->>>>>>> develop
   }
 
   public start(): void {

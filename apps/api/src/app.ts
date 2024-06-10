@@ -14,6 +14,7 @@ import { SampleRouter } from './routers/sample.router';
 import { ProductCategoryRouter } from './routers/productCategory.router';
 import { CartRouter } from './routers/cart.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
+import { AuthRouter } from './routers/auth.router';
 
 export default class App {
   private app: Express;
@@ -59,6 +60,7 @@ export default class App {
     const sampleRouter = new SampleRouter();
     const productCategoryRouter = new ProductCategoryRouter();
     const addToCartRouter = new CartRouter();
+    const authRouter = new AuthRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -68,6 +70,7 @@ export default class App {
 
     this.app.use('/api/product-category', productCategoryRouter.getRouter());
     this.app.use('/api/cart', addToCartRouter.getRouter());
+    this.app.use('/api/auth', authRouter.getRouter());
   }
 
   public start(): void {

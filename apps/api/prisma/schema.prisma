@@ -25,7 +25,7 @@ model User {
   user_name     String?
   user_email    String  @unique
   user_photo    String?
-  user_password String?
+  user_password String? @db.VarChar(255)
   is_verified   Boolean @default(false)
   role          String
 

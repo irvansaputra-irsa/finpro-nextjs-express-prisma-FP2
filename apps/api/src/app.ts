@@ -10,9 +10,11 @@ import express, {
 } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
+import { AddressRouter } from './routers/address.router';
 import { SampleRouter } from './routers/sample.router';
 import { ProductCategoryRouter } from './routers/productCategory.router';
 import { CartRouter } from './routers/cart.router';
+import { CartItemRouter } from './routers/cartItem.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
 
 export default class App {
@@ -59,6 +61,8 @@ export default class App {
     const sampleRouter = new SampleRouter();
     const productCategoryRouter = new ProductCategoryRouter();
     const addToCartRouter = new CartRouter();
+    const addressRouter = new AddressRouter();
+    const cartItemRouter = new CartItemRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -68,6 +72,8 @@ export default class App {
 
     this.app.use('/api/product-category', productCategoryRouter.getRouter());
     this.app.use('/api/cart', addToCartRouter.getRouter());
+    this.app.use('/api/address', addressRouter.getRouter());
+    this.app.use('/api/cart-item', cartItemRouter.getRouter());
   }
 
   public start(): void {

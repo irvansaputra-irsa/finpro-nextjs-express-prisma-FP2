@@ -1,8 +1,10 @@
 import { Service } from 'typedi';
+import { CartItem } from '@prisma/client';
 import { checkCartItem } from '@/interfaces/checkCartItem.interfaces';
 import { createCartItem } from '@/interfaces/createCartItem.interfaces';
 import { addCartItem } from '@/interfaces/addCart.interfaces';
 import { updateCartItem } from '@/interfaces/updateCartItem.interfaces';
+import { allCartItem } from '@/interfaces/allCartItem.interfaces';
 import prisma from '@/prisma';
 
 @Service()
@@ -128,6 +130,26 @@ export class CartItemQuery {
           },
         });
       }
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public allCartItemQuery = async (param: allCartItem): Promise<CartItem[]> => {
+    try {
+      const { cartId } = param;
+
+      const data = await prisma.cartItem.findMany({
+        where: {
+          cart_id: cartId,
+        },
+        orderBy: [
+          {
+            id: 'asc',
+          },
+        ],
+      });
+      return data;
     } catch (error) {
       throw error;
     }

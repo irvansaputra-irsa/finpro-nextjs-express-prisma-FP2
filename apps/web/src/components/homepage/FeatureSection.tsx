@@ -29,7 +29,7 @@ const Feature = ({ title, text, icon }: FeatureProps) => {
   );
 };
 
-export default function FeaSection() {
+export default function FeatureSection() {
   return (
     <Box p={4}>
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>

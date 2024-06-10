@@ -10,18 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 import { ReactNode } from 'react';
-import Image from 'next/image';
-
-const Logo = (props: any) => {
-  return (
-    <Image
-      src={'/assets/logo.png'}
-      alt={'Librairie Logo'}
-      width={60}
-      height={60}
-    />
-  );
-};
+import Logo from '../logo/logo';
 
 const SocialButton = ({
   children,
@@ -70,7 +59,7 @@ export default function Footer() {
         justify={{ base: 'center', md: 'space-between' }}
         align={{ base: 'center', md: 'center' }}
       >
-        <Logo />
+        <Logo w={60} h={60} />
 
         <Text>© 2024 Librairie. All rights reserved</Text>
         <Stack direction={'row'} spacing={6}>

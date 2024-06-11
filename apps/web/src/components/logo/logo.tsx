@@ -7,6 +7,7 @@ export default function Logo({ w, h }: { w: number; h: number }) {
       alt={'Librairie Logo'}
       width={w}
       height={h}
+      priority={true}
     />
   );
 }

@@ -10,6 +10,21 @@ export class CartController {
   cartController = Container.get(CartService);
   cartItemController = Container.get(CartItemService);
 
+  public getCartId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { userId } = req.body;
+      const cartId = await this.cartController.getAliveCartService({ userId });
+
+      res.status(200).json({ cartId });
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // untuk menambahkan buku baru ke dalam cart
   // sehingga, sekaligus menambah cartitem ke dalam cart
   public addItemController = async (

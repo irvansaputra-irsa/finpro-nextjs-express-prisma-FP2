@@ -28,6 +28,7 @@ export class CartItemController {
           name: bookName,
           quantity: cartItems[i].quantity,
           totalPrice: cartItems[i].total_price,
+          totalWeight: cartItems[i].total_weight,
         });
       }
 

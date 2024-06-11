@@ -185,3 +185,13 @@ model CartItem {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
+
+model RajaOngkir {
+  city_id Int @id
+  province_id Int
+  city_name String
+  postal_code Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}

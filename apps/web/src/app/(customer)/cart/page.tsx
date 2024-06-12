@@ -1,5 +1,5 @@
 // TODO: 1. Change userId from hardcode
-// TODO: 2. Change cartId from hardcode
+// TODO: 2. Change distination address from hardcode with the help of open cage
 
 'use client';
 
@@ -28,6 +28,7 @@ interface Item {
   name: string;
   quantity: number;
   totalPrice: number;
+  totalWeight: number;
 }
 
 interface ItemListProps {
@@ -37,7 +38,15 @@ interface ItemListProps {
 export default function CartPage() {
   const [address, setAddress] = useState<Address | null>(null);
   const [items, setItems] = useState<Item[]>([]);
-  const cartId = 2;
+  const [cartId, setCartId] = useState<number | null>(null);
+  const [finalPrice, setFinalPrice] = useState<number>(0);
+  const [finalWeight, setFinalWeight] = useState<number>(0);
+  const [originAddressId, setOriginAddressId] = useState<string>('');
+  const [destinationAddressId, setDestinationAddressId] = useState<string>('');
+  const [shippingReg, setShippingReg] = useState<number>(0);
+  const [shippingOke, setShippingOke] = useState<number>(0);
+  const [shippingYes, setShippingYes] = useState<number>(0);
+  const userId = 1;
 
   useEffect(() => {
     const fetchDefaultAddress = async () => {
@@ -49,11 +58,10 @@ export default function CartPage() {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userId: 1 }),
+            body: JSON.stringify({ userId: userId }),
           },
         );
         if (response.ok) {
-          console.log('reponse dot oke');
           const data = await response.json();
           setAddress(data);
         } else {
@@ -68,33 +76,151 @@ export default function CartPage() {
   }, []);
 
   useEffect(() => {
-    const fetchCartItems = async (cartId: number) => {
+    const fetchCartId = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API_URL}/cart-item/all`,
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}/cart/get-cart-id`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ cartId }),
+            body: JSON.stringify({ userId }),
+          },
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setCartId(data.cartId);
+        } else {
+          throw new Error('Failed to fetch cart ID');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchCartId();
+  }, [userId]);
+
+  useEffect(() => {
+    if (cartId !== null) {
+      const fetchCartItems = async (cartId: number) => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_API_URL}/cart-item/all`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ cartId }),
+            },
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            setItems(data.returnResult);
+
+            const totPrice = data.returnResult.reduce(
+              (sum: number, item: Item) => sum + item.totalPrice,
+              0,
+            );
+            setFinalPrice(totPrice);
+
+            const totWeight = data.returnResult.reduce(
+              (sum: number, item: Item) => sum + item.totalWeight,
+              0,
+            );
+            setFinalWeight(totWeight);
+          } else {
+            throw new Error('Failed to fetch cart items');
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      fetchCartItems(cartId);
+    }
+  }, [cartId]);
+
+  useEffect(() => {
+    const getOriginCityId = async () => {
+      try {
+        const oriAddress = address?.city;
+        console.log('city name:', oriAddress);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}/raja-ongkir/city-id`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ cityName: oriAddress }),
+          },
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log('ini city id yang diterima:', data);
+          setOriginAddressId(data.cityId);
+        } else {
+          throw new Error('Failed to fetch cart ID');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getOriginCityId();
+  }, [address]);
+
+  // Buat yang sama dengan destination address
+  useEffect(() => {
+    setDestinationAddressId('151');
+  }, []);
+
+  useEffect(() => {
+    const calculateShippingCost = async () => {
+      try {
+        console.log('=======');
+        console.log('origin:', originAddressId);
+        console.log('dest:', destinationAddressId);
+        console.log('weight', finalWeight.toString);
+
+        const response = await fetch(
+          'https://raja-ongkir-proxy.vercel.app/api/get-delivery-cost',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              origin: originAddressId,
+              destination: destinationAddressId,
+              weight: finalWeight.toString(),
+              courier: 'jne',
+            }),
           },
         );
 
         if (response.ok) {
           const data = await response.json();
-          setItems(data.returnResult);
-        } else {
-          throw new Error('Failed to fetch cart items');
+          console.log(data);
+          const costReg = data.rajaongkir.results[0].costs[0].cost[0].value;
+          const costOke = data.rajaongkir.results[0].costs[1].cost[0].value;
+          const costYes = data.rajaongkir.results[0].costs[2].cost[0].value;
+
+          setShippingReg(costReg);
+          setShippingOke(costOke);
+          setShippingYes(costYes);
         }
       } catch (error) {
-        console.error(error);
-        // Handle error, show message to user, etc.
+        throw error;
       }
     };
 
-    fetchCartItems(cartId);
-  }, [cartId]);
+    calculateShippingCost();
+  }, [originAddressId, destinationAddressId, finalWeight]);
 
   const ItemList: React.FC<ItemListProps> = ({ items }) => {
     return (
@@ -139,8 +265,8 @@ export default function CartPage() {
             <Text mb={2} fontWeight="bold">
               Total
             </Text>
-            <Text>Harga Buku:</Text>
-            <Text>Ongkir:</Text>
+            <Text>Harga Buku: {finalPrice}</Text>
+            <Text>Berat Buku: {finalWeight}</Text>
           </Box>
 
           <Button
@@ -179,13 +305,13 @@ export default function CartPage() {
             <RadioGroup>
               <Stack direction="column" spacing={3}>
                 <Radio colorScheme="orange" value="REG">
-                  REG (Reguler)
+                  REG - Rp {shippingReg}
                 </Radio>
                 <Radio colorScheme="orange" value="OKE">
-                  OKE (Ongkos Kirim Ekonomis)
+                  OKE - Rp {shippingOke}
                 </Radio>
                 <Radio colorScheme="orange" value="YES">
-                  YES (Yakin Esok Sampai)
+                  YES - Rp {shippingYes}
                 </Radio>
               </Stack>
             </RadioGroup>

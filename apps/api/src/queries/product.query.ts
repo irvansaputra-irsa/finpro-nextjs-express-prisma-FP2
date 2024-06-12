@@ -63,7 +63,7 @@ export class ProductQuery {
               book_published_year: Number(book_published_year),
               book_category_id: Number(book_category_id),
               book_ISBN,
-              book_price: Number(book_price),
+              book_price: String(book_price),
               book_weight: Number(book_weight),
               BookImage: {
                 createMany: {
@@ -195,7 +195,7 @@ export class ProductQuery {
               book_published_year: Number(book_published_year),
               book_category_id: Number(book_category_id),
               book_ISBN,
-              book_price: Number(book_price),
+              book_price: String(book_price),
               book_weight: Number(book_weight),
               BookImage: {
                 createMany: {

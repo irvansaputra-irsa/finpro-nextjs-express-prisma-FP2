@@ -80,4 +80,19 @@ export class AuthQuery {
       throw error;
     }
   };
+  public logoutQuery = async (userEmail: string) => {
+    try {
+      const data = await prisma.user.update({
+        data: {
+          user_password: null,
+        },
+        where: {
+          user_email: userEmail,
+        },
+      });
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

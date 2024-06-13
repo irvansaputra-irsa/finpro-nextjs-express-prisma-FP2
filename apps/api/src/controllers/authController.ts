@@ -57,4 +57,21 @@ export class AuthController {
       next(error);
     }
   };
+
+  public logoutController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { userEmail } = req.body;
+      const data = await this.authService.logoutService(userEmail);
+      res.status(200).json({
+        message: 'Logout Success',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

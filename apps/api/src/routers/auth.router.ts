@@ -22,6 +22,7 @@ export class AuthRouter {
       this.authMiddleware.verifyToken,
       this.authController.verifyController,
     );
+    this.router.get('/logout', this.authController.logoutController);
   }
 
   getRouter(): Router {

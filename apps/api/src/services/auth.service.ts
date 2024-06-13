@@ -72,4 +72,13 @@ export class AuthService {
       throw error;
     }
   };
+
+  public logoutService = async (userEmail: string) => {
+    try {
+      const data = await this.authQuery.logoutQuery(userEmail);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

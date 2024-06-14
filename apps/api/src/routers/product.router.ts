@@ -27,9 +27,13 @@ export class ProductRouter {
     this.router.get('/:bookName', this.productController.getProductController);
     this.router.patch(
       '/',
-      this.productMiddleware.isProductNameExist,
+      this.productMiddleware.isProductNameExistUpdate,
       uploader('IMG', '/products').array('files', 5),
       this.productController.updateProductController,
+    );
+    this.router.delete(
+      '/image/:id',
+      this.productController.deleteProductImageController,
     );
   }
 

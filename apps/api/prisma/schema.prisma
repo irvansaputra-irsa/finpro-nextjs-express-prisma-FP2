@@ -96,19 +96,26 @@ model Warehouse {
   Transaction        Transaction[]
   WarehouseStock     WarehouseStock[]
 
+  Pengeluaran MutationHistory[] @relation("pengeluaran")
+  Pemasukan   MutationHistory[] @relation("pemasukan")
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 model MutationHistory {
-  id                Int    @id @default(autoincrement())
-  from_warehouse_id Int
-  to_warehouse_id   Int
-  book_id           Int
-  quantity          Int
-  status            Int
-  type              String
-  message           String
+  id      Int @id @default(autoincrement())
+  from_id Int
+  to_id   Int
+
+  from_warehouse Warehouse @relation("pengeluaran", fields: [from_id], references: [id])
+  to_warehouse   Warehouse @relation("pemasukan", fields: [to_id], references: [id])
+
+  book_id  Int
+  quantity Int
+  status   Int
+  type     String
+  message  String
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -123,8 +130,9 @@ model Book {
   book_published_year Int
   book_category_id    Int
   book_ISBN           String
-  book_price          Int
+  book_price          Float
   book_weight         Float
+  primary_image       String
 
   BookImage      BookImage[]
   bookCategory   BookCategory     @relation(references: [id], fields: [book_category_id])
@@ -138,7 +146,6 @@ model Book {
 model BookImage {
   id         Int    @id @default(autoincrement())
   book_image String
-  order      Int
 
   book_id Int
   book    Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
@@ -187,9 +194,9 @@ model CartItem {
 }
 
 model RajaOngkir {
-  city_id Int @id
+  city_id     Int    @id
   province_id Int
-  city_name String
+  city_name   String
   postal_code Int
 
   created_at DateTime @default(now())

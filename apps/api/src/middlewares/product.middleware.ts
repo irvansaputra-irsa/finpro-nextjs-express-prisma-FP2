@@ -19,4 +19,26 @@ export class ProductMiddleware {
       next(error);
     }
   };
+  public isProductNameExistUpdate = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const name = req.header('BookName');
+      const id = req.header('BookId');
+      const check = await this.productQuery.checkProductForUpdate(
+        Number(id),
+        name,
+      );
+      if (check)
+        throw new HttpException(
+          400,
+          'Book name already existed, Please choose another name',
+        );
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
 }

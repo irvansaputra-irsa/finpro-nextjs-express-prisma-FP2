@@ -62,4 +62,13 @@ export class ProductService {
       throw error;
     }
   };
+
+  public deleteProductImageService = async (id: number) => {
+    try {
+      const data = await this.productQuery.deleteProductImageQuery(id);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

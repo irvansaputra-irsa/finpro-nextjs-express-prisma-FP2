@@ -40,7 +40,7 @@ export const uploader = (filePrefix: string, folderName?: string) => {
       cb: FileFilterCallback,
     ) => {
       try {
-        const extensionFormat = ['.jpg', '.png', '.jpeg', 'gif'];
+        const extensionFormat = ['.jpg', '.png', '.jpeg', '.gif'];
         const extension = path.extname(file.originalname);
         if (!extensionFormat.includes(extension)) {
           cb(new Error('Invalid file type'));

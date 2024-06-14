@@ -107,4 +107,23 @@ export class ProductController {
       next(error);
     }
   };
+
+  public deleteProductImageController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id } = req.params;
+      const data = await this.productService.deleteProductImageService(
+        Number(id),
+      );
+      res.status(200).json({
+        message: 'Delete Product Image Success',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

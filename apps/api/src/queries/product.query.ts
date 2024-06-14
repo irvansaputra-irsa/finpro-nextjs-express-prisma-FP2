@@ -31,6 +31,22 @@ export class ProductQuery {
     }
   };
 
+  public checkProductForUpdate = async (id: number, name: string) => {
+    try {
+      const res = await prisma.book.findFirst({
+        where: {
+          book_name: name,
+          NOT: {
+            id,
+          },
+        },
+      });
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   public createProductQuery = async (
     params: product,
     files: Express.Multer.File[],
@@ -50,9 +66,8 @@ export class ProductQuery {
             book_weight,
           } = params;
           //   insert data on table Book
-          const images = files.map((el, idx: number) => ({
+          const images = files.map((el) => ({
             book_image: el.filename,
-            order: idx + 1,
           }));
           const data = await prisma.book.create({
             data: {
@@ -65,6 +80,7 @@ export class ProductQuery {
               book_ISBN,
               book_price: Number(book_price),
               book_weight: Number(book_weight),
+              primary_image: files[0]?.filename || '',
               BookImage: {
                 createMany: {
                   data: images,
@@ -128,7 +144,11 @@ export class ProductQuery {
 
   public getAllProductsQuery = async () => {
     try {
-      const data = await prisma.book.findMany();
+      const data = await prisma.book.findMany({
+        include: {
+          bookCategory: true,
+        },
+      });
 
       return data;
     } catch (error) {
@@ -141,6 +161,9 @@ export class ProductQuery {
       const data = await prisma.book.findFirstOrThrow({
         where: {
           book_name,
+        },
+        include: {
+          BookImage: true,
         },
       });
       return data;
@@ -170,7 +193,6 @@ export class ProductQuery {
           } = param;
           const images = files.map((el, idx: number) => ({
             book_image: el.filename,
-            order: idx + 1,
           }));
 
           //fetch list images of the book
@@ -178,12 +200,10 @@ export class ProductQuery {
             where: { book_id: Number(id) },
           });
 
-          //delete all related book image
-          const deleted = await prisma.bookImage.deleteMany({
-            where: {
-              book_id: Number(id),
-            },
-          });
+          //set primary photo product //if current image list is empty, then add primary into new image list
+          const primary = prevImg.length
+            ? prevImg[0].book_image
+            : files[0].filename;
 
           //update the data
           const data = await prisma.book.update({
@@ -197,6 +217,7 @@ export class ProductQuery {
               book_ISBN,
               book_price: Number(book_price),
               book_weight: Number(book_weight),
+              primary_image: primary || '',
               BookImage: {
                 createMany: {
                   data: images,
@@ -208,20 +229,29 @@ export class ProductQuery {
             },
           });
 
-          //unlink sync all previous image
-          if (prevImg) {
-            const dir = join(__dirname, '../public/', 'products');
-            prevImg.forEach((image) => {
-              fs.unlinkSync(dir + '/' + image.book_image);
-            });
-          }
-
           return data;
         } catch (error) {
           throw error;
         }
       });
       return t;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public deleteProductImageQuery = async (imageId: number) => {
+    try {
+      const del = await prisma.bookImage.delete({
+        where: {
+          id: imageId,
+        },
+      });
+      const dir = join(__dirname, '../public/', 'products');
+      if (del) {
+        fs.unlinkSync(dir + '/' + del.book_image);
+      }
+      return del;
     } catch (error) {
       throw error;
     }

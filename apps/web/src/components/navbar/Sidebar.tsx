@@ -117,12 +117,12 @@ const SidebarContent = (props: BoxProps) => {
           />
         </NavItem>
         <Collapse in={integrationsProduct.isOpen}>
-          <Link href={'/dashboard/product'}>
+          <Link href={'/dashboard/product-list'}>
             <NavItem pl="12" py="2">
               Product Item
             </NavItem>
           </Link>
-          <Link href={'/dashboard/productCategory'}>
+          <Link href={'/dashboard/product-category-list'}>
             <NavItem pl="12" py="2">
               Product Category
             </NavItem>

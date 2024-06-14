@@ -5,13 +5,14 @@ import Container, { Service } from 'typedi';
 
 @Service()
 export class ProductCategoryService {
-  productQueries = Container.get(ProductCategoryQuery);
+  productCategoryQueries = Container.get(ProductCategoryQuery);
 
   public createProductCategoryService = async (
     param: productCategory,
   ): Promise<BookCategory> => {
     try {
-      const data = await this.productQueries.createProductCategoryQuery(param);
+      const data =
+        await this.productCategoryQueries.createProductCategoryQuery(param);
 
       return data;
     } catch (error) {
@@ -21,7 +22,8 @@ export class ProductCategoryService {
 
   public getProductCategoriesService = async (): Promise<BookCategory[]> => {
     try {
-      const data = await this.productQueries.getProductCategoriesQuery();
+      const data =
+        await this.productCategoryQueries.getProductCategoriesQuery();
 
       return data;
     } catch (error) {
@@ -33,7 +35,8 @@ export class ProductCategoryService {
     id: number,
   ): Promise<BookCategory> => {
     try {
-      const data = await this.productQueries.getProductCategoryQuery(id);
+      const data =
+        await this.productCategoryQueries.getProductCategoryQuery(id);
 
       return data;
     } catch (error) {
@@ -47,10 +50,11 @@ export class ProductCategoryService {
   ): Promise<BookCategory> => {
     try {
       //check category availability first
-      const check = await this.productQueries.getProductCategoryQuery(id);
+      const check =
+        await this.productCategoryQueries.getProductCategoryQuery(id);
       if (!check) throw new Error('Category is not found');
 
-      const data = await this.productQueries.updateProductCategoryQuery(
+      const data = await this.productCategoryQueries.updateProductCategoryQuery(
         param,
         id,
       );
@@ -64,7 +68,12 @@ export class ProductCategoryService {
     id: number,
   ): Promise<BookCategory> => {
     try {
-      const data = await this.productQueries.deleteProductCategoryQuery(id);
+      const check =
+        await this.productCategoryQueries.checkCategoryOnProduct(id);
+      if (check) throw new Error('This category already used on book product');
+
+      const data =
+        await this.productCategoryQueries.deleteProductCategoryQuery(id);
 
       return data;
     } catch (error) {

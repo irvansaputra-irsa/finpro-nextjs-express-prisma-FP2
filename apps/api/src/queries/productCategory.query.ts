@@ -102,4 +102,17 @@ export class ProductCategoryQuery {
       throw error;
     }
   };
+
+  public checkCategoryOnProduct = async (id: number) => {
+    try {
+      const isRelateOnProduct = await prisma.book.findFirst({
+        where: {
+          book_category_id: id,
+        },
+      });
+      return isRelateOnProduct;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

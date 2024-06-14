@@ -19,6 +19,7 @@ import { RajaOngkirRouter } from './routers/rajaOngkir.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
 import { ProductRouter } from './routers/product.router';
 import { AuthRouter } from './routers/auth.router';
+import path from 'path';
 
 export default class App {
   private app: Express;
@@ -33,6 +34,7 @@ export default class App {
   private configure(): void {
     this.app.use(cors());
     this.app.use(json());
+    this.app.use('/images', express.static(path.join(__dirname, 'public')));
     this.app.use(urlencoded({ extended: true }));
   }
 

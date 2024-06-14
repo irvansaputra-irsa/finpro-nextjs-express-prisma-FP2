@@ -8,4 +8,5 @@ export interface product {
   book_ISBN: string;
   book_price: number;
   book_weight: number;
+  primary_image: string;
 }

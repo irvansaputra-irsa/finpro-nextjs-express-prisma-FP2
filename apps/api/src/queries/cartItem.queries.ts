@@ -70,7 +70,7 @@ export class CartItemQuery {
 
       const newQuantity = quantity;
 
-      const newPrice = newQuantity * Number(bookData.book_price);
+      const newPrice = newQuantity * bookData.book_price;
 
       const newWeight = newQuantity * bookData.book_weight;
 
@@ -115,7 +115,7 @@ export class CartItemQuery {
           },
         });
 
-        const newPrice = newQuantity * Number(bookData.book_price);
+        const newPrice = newQuantity * bookData.book_price;
 
         const newWeight = newQuantity * bookData.book_weight;
 

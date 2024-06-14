@@ -10,7 +10,11 @@ export const useRegisterMutation = ({
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: any) => {
-      const res = await instance.post('auth/register', { userEmail: data });
+      const res = await instance.post(
+        '/auth/register',
+        { userEmail: data },
+        { withCredentials: true },
+      );
       return res;
     },
     onSuccess,
@@ -30,12 +34,13 @@ export const useVerifyMutation = ({ onSuccess, onError }: MutationOptions) => {
       token: string;
     }) => {
       const res = await instance.post(
-        'auth/verify',
+        '/auth/verify',
         {
           userEmail: userEmail,
           userPassword: userPassword,
         },
         {
+          withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -57,10 +62,14 @@ export const useLoginMutation = ({ onSuccess, onError }: MutationOptions) => {
       userEmail: string;
       userPassword: string;
     }) => {
-      const res = await instance.post('auth/login', {
-        userEmail: userEmail,
-        userPassword: userPassword,
-      });
+      const res = await instance.post(
+        '/auth/login',
+        {
+          userEmail: userEmail,
+          userPassword: userPassword,
+        },
+        { withCredentials: true },
+      );
       return res;
     },
     onSuccess,

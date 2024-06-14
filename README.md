@@ -44,15 +44,18 @@ Example : `npm run seqeulize --workspace=api -- --db:migrate`
 ### File Naming Conventions:
 
 1. **Use CamelCase for filenames:**
+
    - Begin filenames with a lowercase letter.
    - For multiple words, capitalize the first letter of each subsequent word.
    - Example: `index.js`, `userModel.js`, `dataAccess.js`
 
 2. **Use Descriptive Names:**
+
    - Choose names that accurately describe the file's purpose or content.
    - Avoid overly generic names like `utils.js` unless the file genuinely contains utility functions.
 
 3. **Follow Naming Conventions for Specific File Types:**
+
    - For configuration files, use names like `.env`, `config.js`, or `settings.json`.
    - Use consistent naming for test files, such as appending `.test.js` or `.spec.js` to the filename being tested.
    - Use `package.json` for the project's metadata and dependencies.
@@ -63,12 +66,15 @@ Example : `npm run seqeulize --workspace=api -- --db:migrate`
 ### Folder Naming Conventions:
 
 1. **Use Singular or Plural Naming:**
+
    - Choose a consistent convention for naming folders (e.g., `models` or `model`, `routes` or `route`).
 
 2. **Avoid Special Characters and Spaces:**
+
    - Use hyphens (`-`) or underscores (`_`) for separating words in folder names, but avoid spaces or special characters.
 
 3. **Use Descriptive Names for Folders:**
+
    - Name folders according to their content or purpose (e.g., `controllers`, `services`, `utils`, `tests`, `public`, `views`, etc.).
 
 4. **Nested Folder Structure:**

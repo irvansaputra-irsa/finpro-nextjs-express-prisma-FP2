@@ -33,3 +33,16 @@ export const useProduct = (slug: string | undefined) => {
     enabled: !!slug,
   });
 };
+
+export const useProductCategoryDetail = (slug: string | undefined) => {
+  return useQuery({
+    queryKey: ['product-category'],
+    queryFn: async () => {
+      if (slug) {
+        const res = await instance.get(`/product-category/${slug}`);
+        return res;
+      }
+    },
+    enabled: !!slug,
+  });
+};

@@ -184,3 +184,78 @@ export const useCategoryProductDeleteMutation = () => {
     },
   });
 };
+
+export const useCategoryMutation = () => {
+  const router = useRouter();
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { bookCategoryName: string }) => {
+      const res = await instance.post(`/product-category`, payload);
+      return res;
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err)) {
+        const res = err.response?.data as errorResponse;
+        toast({
+          title: 'Failed to create',
+          description: res.message || 'An error occurred while submitting.',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-category'] });
+      toast({
+        title: 'Success',
+        description: 'You have created one product category',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      router.push('/dashboard/product-category-list');
+    },
+  });
+};
+
+type productCategory = {
+  bookCategoryId: number;
+  bookCategoryName: string;
+};
+
+export const useCategoryProductUpdateMutation = () => {
+  const router = useRouter();
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: productCategory) => {
+      const res = await instance.patch(`/product-category`, payload);
+      return res;
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err)) {
+        const res = err.response?.data as errorResponse;
+        toast({
+          title: 'Failed to update',
+          description: res.message || 'An error occurred while submitting.',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-category'] });
+      toast({
+        title: 'Success',
+        description: 'You have updated one product category',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      router.push('/dashboard/product-category-list');
+    },
+  });
+};

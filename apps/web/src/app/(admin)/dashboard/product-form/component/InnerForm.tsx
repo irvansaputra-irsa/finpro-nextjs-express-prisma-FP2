@@ -566,7 +566,6 @@ export default function InnerForm(props: any) {
             }}
             fontWeight="md"
             isDisabled={isSubmitting}
-            disabled={isSubmitting}
           >
             Save
           </Button>

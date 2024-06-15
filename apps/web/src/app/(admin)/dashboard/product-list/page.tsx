@@ -47,38 +47,42 @@ export default function ProductList() {
               </Tr>
             </Thead>
             <Tbody>
-              {productList.map(
-                ({ id, book_name, book_price, bookCategory }, idx: number) => (
-                  <Tr key={idx}>
-                    <Td>{book_name}</Td>
-                    <Td>{bookCategory?.book_category_name}</Td>
-                    <Td isNumeric>{book_price}</Td>
-                    <Td>
-                      <Flex>
-                        <Icon
-                          cursor={'pointer'}
-                          as={FaEdit}
-                          w={5}
-                          h={5}
-                          mr={3}
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/product-form?product_name=${separateStringHyphen(book_name)}`,
-                            )
-                          }
-                        />
-                        <Icon
-                          cursor={'pointer'}
-                          as={MdDelete}
-                          w={5}
-                          h={5}
-                          onClick={() => handleDeleteProduct(id)}
-                        />
-                      </Flex>
-                    </Td>
-                  </Tr>
-                ),
-              )}
+              {productList.length &&
+                productList?.map(
+                  (
+                    { id, book_name, book_price, bookCategory },
+                    idx: number,
+                  ) => (
+                    <Tr key={idx}>
+                      <Td>{book_name}</Td>
+                      <Td>{bookCategory?.book_category_name}</Td>
+                      <Td isNumeric>{book_price}</Td>
+                      <Td>
+                        <Flex>
+                          <Icon
+                            cursor={'pointer'}
+                            as={FaEdit}
+                            w={5}
+                            h={5}
+                            mr={3}
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/product-form?product_name=${separateStringHyphen(book_name)}`,
+                              )
+                            }
+                          />
+                          <Icon
+                            cursor={'pointer'}
+                            as={MdDelete}
+                            w={5}
+                            h={5}
+                            onClick={() => handleDeleteProduct(id)}
+                          />
+                        </Flex>
+                      </Td>
+                    </Tr>
+                  ),
+                )}
             </Tbody>
           </Table>
         </TableContainer>

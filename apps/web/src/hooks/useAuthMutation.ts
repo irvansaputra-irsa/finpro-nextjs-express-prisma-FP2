@@ -13,7 +13,7 @@ export const useRegisterMutation = ({
       const res = await instance.post(
         '/auth/register',
         { userEmail: data },
-        { withCredentials: true },
+        // { withCredentials: true },
       );
       return res;
     },
@@ -40,7 +40,7 @@ export const useVerifyMutation = ({ onSuccess, onError }: MutationOptions) => {
           userPassword: userPassword,
         },
         {
-          withCredentials: true,
+          // withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -68,7 +68,7 @@ export const useLoginMutation = ({ onSuccess, onError }: MutationOptions) => {
           userEmail: userEmail,
           userPassword: userPassword,
         },
-        { withCredentials: true },
+        // { withCredentials: true },
       );
       return res;
     },

@@ -140,9 +140,11 @@ const SidebarContent = (props: BoxProps) => {
           />
         </NavItem>
         <Collapse in={integrationsInventory.isOpen}>
-          <NavItem pl="12" py="2">
-            Stock Management
-          </NavItem>
+          <Link href={'/dashboard/stock-management'}>
+            <NavItem pl="12" py="2">
+              Stock Management
+            </NavItem>
+          </Link>
           <NavItem pl="12" py="2">
             Stock Mutation
           </NavItem>

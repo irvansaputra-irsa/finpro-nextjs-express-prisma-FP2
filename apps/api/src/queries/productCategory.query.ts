@@ -57,7 +57,6 @@ export class ProductCategoryQuery {
 
   public updateProductCategoryQuery = async (
     param: productCategory,
-    id: number,
   ): Promise<BookCategory> => {
     try {
       const transaction = await prisma.$transaction(async () => {
@@ -65,7 +64,7 @@ export class ProductCategoryQuery {
           const { bookCategoryName } = param;
 
           const data = await prisma.bookCategory.update({
-            where: { id },
+            where: { id: param.bookCategoryId },
             data: {
               book_category_name: bookCategoryName,
             },

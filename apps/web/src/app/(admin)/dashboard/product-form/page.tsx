@@ -1,13 +1,6 @@
 'use client';
 import * as Yup from 'yup';
-import {
-  Box,
-  Divider,
-  GridItem,
-  Heading,
-  SimpleGrid,
-  useToast,
-} from '@chakra-ui/react';
+import { Box, Divider, GridItem, Heading, SimpleGrid } from '@chakra-ui/react';
 import { withFormik } from 'formik';
 import React, { useEffect } from 'react';
 import InnerForm from './component/InnerForm';
@@ -18,7 +11,6 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { useProduct } from '@/hooks/useProduct';
 import { product, productImage } from '@/interface/product.interface';
-import { values } from 'cypress/types/lodash';
 export interface FormValues {
   bookName: string;
   bookDescription: string;

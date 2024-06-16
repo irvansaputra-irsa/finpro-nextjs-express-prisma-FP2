@@ -21,7 +21,7 @@ export class ProductCategoryRouter {
       this.productCategoryController.getProductCategoriesController,
     );
     this.router.patch(
-      '/:id',
+      '/',
       this.productCategoryController.updateProductCategoryController,
     );
     this.router.delete(

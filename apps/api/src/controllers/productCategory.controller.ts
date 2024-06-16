@@ -68,11 +68,8 @@ export class ProductCategoryController {
   ): Promise<void> => {
     try {
       const param = req.body;
-      const { id } = req.params;
-      const data = await this.categoryController.updateProductCategoryService(
-        param,
-        Number(id),
-      );
+      const data =
+        await this.categoryController.updateProductCategoryService(param);
 
       res.status(200).json({
         message: 'Update Product Category Success',

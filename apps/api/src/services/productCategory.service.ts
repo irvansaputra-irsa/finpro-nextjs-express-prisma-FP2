@@ -46,18 +46,16 @@ export class ProductCategoryService {
 
   public updateProductCategoryService = async (
     param: productCategory,
-    id: number,
   ): Promise<BookCategory> => {
     try {
       //check category availability first
-      const check =
-        await this.productCategoryQueries.getProductCategoryQuery(id);
+      const check = await this.productCategoryQueries.getProductCategoryQuery(
+        param.bookCategoryId,
+      );
       if (!check) throw new Error('Category is not found');
 
-      const data = await this.productCategoryQueries.updateProductCategoryQuery(
-        param,
-        id,
-      );
+      const data =
+        await this.productCategoryQueries.updateProductCategoryQuery(param);
 
       return data;
     } catch (error) {

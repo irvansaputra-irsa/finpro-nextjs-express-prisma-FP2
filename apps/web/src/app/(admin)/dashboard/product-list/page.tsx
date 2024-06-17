@@ -14,14 +14,15 @@ import {
   Tr,
   Box,
   Spinner,
+  Heading,
 } from '@chakra-ui/react';
 import React from 'react';
 import { useProductDashboard } from '@/hooks/useProduct';
 import { product } from '@/interface/product.interface';
 import { useProductDeleteMutation } from '@/hooks/useProductMutation';
 import { useRouter } from 'next/navigation';
-import { separateStringHyphen } from '@/app/utils/convert';
-import Link from 'next/link';
+import { parseCurrency, separateStringHyphen } from '@/utils/convert';
+import { Link } from '@chakra-ui/next-js';
 
 export default function ProductList() {
   const { data, isLoading } = useProductDashboard();
@@ -35,7 +36,13 @@ export default function ProductList() {
 
   if (!isLoading) {
     return (
-      <Box>
+      <Box w={{ base: '100%', xl: '70%' }}>
+        <Flex justifyContent={'space-between'}>
+          <Heading p={5}>Product List</Heading>
+          <Link alignSelf={'center'} href={'/dashboard/product-form'}>
+            <Button>Insert a new book product</Button>
+          </Link>
+        </Flex>
         <TableContainer>
           <Table variant="simple">
             <Thead>
@@ -43,7 +50,7 @@ export default function ProductList() {
                 <Th>Name</Th>
                 <Th>Category</Th>
                 <Th isNumeric>Price</Th>
-                <Th>Action</Th>
+                <Th isNumeric>Action</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -56,9 +63,9 @@ export default function ProductList() {
                     <Tr key={idx}>
                       <Td>{book_name}</Td>
                       <Td>{bookCategory?.book_category_name}</Td>
-                      <Td isNumeric>{book_price}</Td>
-                      <Td>
-                        <Flex>
+                      <Td isNumeric> {parseCurrency(book_price)}</Td>
+                      <Td isNumeric>
+                        <Flex justifyContent={'end'}>
                           <Icon
                             cursor={'pointer'}
                             as={FaEdit}
@@ -86,11 +93,7 @@ export default function ProductList() {
             </Tbody>
           </Table>
         </TableContainer>
-        <Flex mt={5} justifyContent={'end'}>
-          <Link href={'/dashboard/product-form'}>
-            <Button>Insert a new book product</Button>
-          </Link>
-        </Flex>
+        <Flex mt={5} justifyContent={'end'}></Flex>
       </Box>
     );
   } else {

@@ -85,7 +85,7 @@ model Warehouse {
   id                   Int    @id @default(autoincrement())
   warehouse_name       String
   warehouse_longitude  String
-  warehouse_langitude  String
+  warehouse_latitude   String
   warehouse_detail_loc String
   warehouse_city       String
   warehouse_province   String

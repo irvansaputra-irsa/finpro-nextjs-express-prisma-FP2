@@ -58,7 +58,6 @@ export default function InnerForm(props: any) {
   //   setValue(newValue);
   // };
   const [preview, setPreview] = useState<Preview[]>([]);
-  console.log('🚀 ~ InnerForm ~ preview:', preview);
   const { data: categoryData } = useProductCategory();
   const { mutate: mutateDeleteImage } = useProductImageDeleteMutation();
 

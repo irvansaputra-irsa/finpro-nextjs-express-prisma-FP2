@@ -10,8 +10,22 @@ export class StockQuery {
     param: warehouseStock,
   ): Promise<WarehouseStock> => {
     try {
-      //1. masukin warehouse stock table dulu
       const { bookId, warehouseId, qty } = param;
+
+      //1. check apakah udah di add ke warehousenya product ini
+      const check = await prisma.warehouseStock.findFirst({
+        where: {
+          book_id: bookId,
+          warehouse_id: warehouseId,
+        },
+      });
+
+      //2. masukin warehouse stock table
+      if (check)
+        throw new Error(
+          'Product already add to the warehouse, suggest to supply the stock',
+        );
+
       const data = await prisma.warehouseStock.create({
         data: {
           book_id: bookId,
@@ -79,6 +93,13 @@ export class StockQuery {
           type: 'Penambahan',
           message: `Buku ${isProductAtWarehouse.book.book_name} telah ditambahkan ke warehouse ${isProductAtWarehouse.warehouse.warehouse_name} sebanyak ${stockAddition} buah`,
         },
+        include: {
+          warehouseStock: {
+            include: {
+              warehouse: true,
+            },
+          },
+        },
       });
 
       return jurnal;
@@ -121,6 +142,9 @@ export class StockQuery {
               warehouse_id: warehouseId,
             },
           },
+        },
+        include: {
+          bookCategory: true,
         },
       });
       return productList;

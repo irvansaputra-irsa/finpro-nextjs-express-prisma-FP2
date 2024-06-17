@@ -82,17 +82,16 @@ model Transaction {
 }
 
 model Warehouse {
-  id                    Int    @id @default(autoincrement())
-  warehouse_name        String
-  warehouse_longitude   String
-  warehouse_langitude   String
-  warehouse_street      String
-  warehouse_postal_code Int
-  warehouse_city        String
-  warehouse_country     String
+  id                   Int    @id @default(autoincrement())
+  warehouse_name       String
+  warehouse_longitude  String
+  warehouse_latitude   String
+  warehouse_detail_loc String
+  warehouse_city       String
+  warehouse_province   String
 
-  warehouse_admin_id Int              @unique
-  user               User             @relation(fields: [warehouse_admin_id], references: [id])
+  warehouse_admin_id Int?             @unique
+  user               User?            @relation(fields: [warehouse_admin_id], references: [id])
   Transaction        Transaction[]
   WarehouseStock     WarehouseStock[]
 
@@ -114,8 +113,7 @@ model MutationHistory {
   book_id  Int
   quantity Int
   status   Int
-  type     String
-  message  String
+  message  String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -171,11 +169,30 @@ model WarehouseStock {
   warehouse_id Int
   stockQty     Int
 
-  book      Book      @relation(fields: [book_id], references: [id])
-  warehouse Warehouse @relation(fields: [warehouse_id], references: [id])
+  JurnalStock JurnalStock[]
+  book        Book          @relation(fields: [book_id], references: [id])
+  warehouse   Warehouse     @relation(fields: [warehouse_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model JurnalStock {
+  id          Int     @id @default(autoincrement())
+  message     String?
+  oldStock    Int
+  newStock    Int
+  stockChange Int
+
+  type TYPE
+
+  warehouseStockId Int
+  warehouseStock   WarehouseStock @relation(fields: [warehouseStockId], references: [id])
+}
+
+enum TYPE {
+  Penambahan
+  Pengurangan
 }
 
 model CartItem {

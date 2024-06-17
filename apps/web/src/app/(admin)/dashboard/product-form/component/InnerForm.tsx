@@ -453,7 +453,7 @@ export default function InnerForm(props: any) {
                   {preview?.length > 0 ? (
                     preview.map((el, idx) => (
                       <Stack key={idx}>
-                        <Box border={idx + 1 === 1 ? 'red solid 0px' : ''}>
+                        <Box border={idx + 1 === 1 ? 'red solid 4px' : ''}>
                           <Image w={'240px'} h={'135px'} src={el?.source} />
                         </Box>
                         <IconButton

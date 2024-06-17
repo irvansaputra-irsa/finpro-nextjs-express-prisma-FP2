@@ -117,7 +117,7 @@ export const useUpdateProductMutation = () => {
   const router = useRouter();
   return useMutation({
     mutationFn: async (form: FormData) => {
-      const res = await instance.patch('/product/', form, {
+      const res = await instance.patch('/product', form, {
         headers: {
           'Content-Type': 'multipart/form-data',
           BookName: form.get('book_name') as string,

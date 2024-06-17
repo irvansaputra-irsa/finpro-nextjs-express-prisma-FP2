@@ -97,7 +97,7 @@ export default function ProductForm() {
 
   const validate = (values: FormValues) => {
     const errors: any = {};
-    if (!(bookData.BookImage || []).length) {
+    if (!(bookData?.BookImage || []).length) {
       if (!values.file?.length) {
         errors.file = 'Please upload some images';
       }

@@ -25,8 +25,9 @@ export interface product {
   book_published_year: number;
   book_publisher: string;
   book_weight: number;
+  primary_image: string;
   created_at: Date;
   updated_at: Date;
-  bookCategory: productCategory;
+  bookCategory?: productCategory;
   BookImage?: productImage[];
 }

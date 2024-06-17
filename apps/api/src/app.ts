@@ -19,6 +19,7 @@ import { RajaOngkirRouter } from './routers/rajaOngkir.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
 import { ProductRouter } from './routers/product.router';
 import { AuthRouter } from './routers/auth.router';
+import { StockRouter } from './routers/stock.router';
 import path from 'path';
 
 export default class App {
@@ -71,6 +72,7 @@ export default class App {
     const cartItemRouter = new CartItemRouter();
     const authRouter = new AuthRouter();
     const rajaOngkirRouter = new RajaOngkirRouter();
+    const stockRouter = new StockRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -85,6 +87,7 @@ export default class App {
     this.app.use('/api/cart-item', cartItemRouter.getRouter());
     this.app.use('/api/auth', authRouter.getRouter());
     this.app.use('/api/raja-ongkir', rajaOngkirRouter.getRouter());
+    this.app.use('/api/stock', stockRouter.getRouter());
   }
 
   public start(): void {

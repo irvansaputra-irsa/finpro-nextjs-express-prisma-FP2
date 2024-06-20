@@ -35,7 +35,7 @@ export class AddressQuery {
       const { userId } = param;
       const data = await prisma.address.findMany({
         where: {
-          user_id: userId,
+          user_id: Number(userId),
         },
         orderBy: [
           {

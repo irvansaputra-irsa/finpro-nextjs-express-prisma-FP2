@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/navigation';
 
 interface Address {
   street: string;
@@ -35,7 +36,27 @@ interface ItemListProps {
   items: Item[];
 }
 
+interface ShippingOption {
+  service: string;
+  description: string;
+  cost: {
+    value: number;
+    etd: string;
+    note: string;
+  }[];
+}
+
 export default function CartPage() {
+  const router = useRouter();
+
+  const handlePaymentClick = () => {
+    router.push('/transaction');
+  };
+
+  const handleChangeAddressClick = () => {
+    router.push('/deliveryaddress');
+  };
+
   const [address, setAddress] = useState<Address | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [cartId, setCartId] = useState<number | null>(null);
@@ -43,37 +64,41 @@ export default function CartPage() {
   const [finalWeight, setFinalWeight] = useState<number>(0);
   const [originAddressId, setOriginAddressId] = useState<string>('');
   const [destinationAddressId, setDestinationAddressId] = useState<string>('');
-  const [shippingReg, setShippingReg] = useState<number>(0);
-  const [shippingOke, setShippingOke] = useState<number>(0);
-  const [shippingYes, setShippingYes] = useState<number>(0);
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const userId = 1;
+  const [radioValue, setRadioValue] = useState<string>('');
 
   useEffect(() => {
-    const fetchDefaultAddress = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API_URL}/address/default`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+    const storedAddress = sessionStorage.getItem('selectedAddress');
+    if (storedAddress) {
+      setAddress(JSON.parse(storedAddress));
+    } else {
+      const fetchDefaultAddress = async () => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_API_URL}/address/default`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId: userId }),
             },
-            body: JSON.stringify({ userId: userId }),
-          },
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setAddress(data);
-        } else {
-          throw new Error('Failed to fetch default address');
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setAddress(data);
+          } else {
+            throw new Error('Failed to fetch default address');
+          }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      };
 
-    fetchDefaultAddress();
-  }, []);
+      fetchDefaultAddress();
+    }
+  }, [userId]);
 
   useEffect(() => {
     const fetchCartId = async () => {
@@ -104,6 +129,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (cartId !== null) {
+      console.log('cartId is', cartId);
       const fetchCartItems = async (cartId: number) => {
         try {
           const response = await fetch(
@@ -206,13 +232,18 @@ export default function CartPage() {
         if (response.ok) {
           const data = await response.json();
           console.log(data);
-          const costReg = data.rajaongkir.results[0].costs[0].cost[0].value;
-          const costOke = data.rajaongkir.results[0].costs[1].cost[0].value;
-          const costYes = data.rajaongkir.results[0].costs[2].cost[0].value;
+          // const costReg = data.rajaongkir.results[0].costs[0].cost[0].value;
+          // const costOke = data.rajaongkir.results[0].costs[1].cost[0].value;
+          // const costYes = data.rajaongkir.results[0].costs[2].cost[0].value;
 
-          setShippingReg(costReg);
-          setShippingOke(costOke);
-          setShippingYes(costYes);
+          // setShippingReg(costReg);
+          // setShippingOke(costOke);
+          // setShippingYes(costYes);
+
+          setShippingOptions(data.rajaongkir.results[0].costs);
+
+          // set default radio group button
+          setRadioValue(data.rajaongkir.results[0].costs[0].service);
         }
       } catch (error) {
         throw error;
@@ -246,6 +277,28 @@ export default function CartPage() {
     );
   };
 
+  useEffect(() => {
+    if (cartId !== null) {
+      sessionStorage.setItem('cardId', cartId.toString());
+    }
+  }, [cartId]);
+
+  useEffect(() => {
+    const selectedOption = shippingOptions.find(
+      (option) => option.service === radioValue,
+    );
+    if (selectedOption) {
+      sessionStorage.setItem(
+        'hargaOngkir',
+        selectedOption.cost[0].value.toString(),
+      );
+    }
+  }, [radioValue, shippingOptions]);
+
+  useEffect(() => {
+    sessionStorage.setItem('hargaBuku', finalPrice.toString());
+  }, [finalPrice]);
+
   return (
     <Box>
       <Box py={4} px={4}>
@@ -275,6 +328,7 @@ export default function CartPage() {
             size="lg"
             w="full"
             display={{ sm: 'none', md: 'none', lg: 'block' }}
+            onClick={handlePaymentClick}
           >
             Lanjut ke Pembayaran
           </Button>
@@ -293,7 +347,13 @@ export default function CartPage() {
             <Text>Kode Pos: {address?.postal_code}</Text>
             <Text>Kota: {address?.city}</Text>
             <Text>Negara: {address?.country}</Text>
-            <Button mt={4} colorScheme="orange" size="sm" w="full">
+            <Button
+              mt={4}
+              colorScheme="orange"
+              size="sm"
+              w="full"
+              onClick={handleChangeAddressClick}
+            >
               Ganti Alamat
             </Button>
           </Box>
@@ -302,17 +362,21 @@ export default function CartPage() {
             <Text mb={2} fontWeight="bold">
               Metode Pengiriman (JNE Only)
             </Text>
-            <RadioGroup>
+            <RadioGroup
+              onChange={setRadioValue}
+              value={radioValue}
+              defaultValue="REG"
+            >
               <Stack direction="column" spacing={3}>
-                <Radio colorScheme="orange" value="REG">
-                  REG - Rp {shippingReg}
-                </Radio>
-                <Radio colorScheme="orange" value="OKE">
-                  OKE - Rp {shippingOke}
-                </Radio>
-                <Radio colorScheme="orange" value="YES">
-                  YES - Rp {shippingYes}
-                </Radio>
+                {shippingOptions.map((option) => (
+                  <Radio
+                    key={option.service}
+                    colorScheme="orange"
+                    value={option.service}
+                  >
+                    {option.service} - Rp {option.cost[0].value}
+                  </Radio>
+                ))}
               </Stack>
             </RadioGroup>
           </Box>

@@ -12,13 +12,48 @@ import {
   CloseButton,
 } from '@chakra-ui/react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useContext } from 'react';
 import { AiOutlineMenu } from 'react-icons/ai';
 import Logo from '../logo/logo';
+import { AuthContext } from '@/context/Auth';
+import Cookies from 'js-cookie';
 
 export default function Navbar() {
   const bg = useColorModeValue('white', 'gray.800');
   const mobileNav = useDisclosure();
+  const { user, setUser } = useContext(AuthContext);
+  const logout = () => {
+    Cookies.remove('token');
+    setUser(null);
+  };
+  const authNavbar = () => {
+    if (!user) {
+      return (
+        <>
+          <Link href="/login">
+            <Button w="full" variant="ghost">
+              Sign in
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button w="full" variant="ghost">
+              Sign up
+            </Button>
+          </Link>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <Link href="/login" onClick={() => logout()}>
+            <Button w="full" variant="ghost">
+              Log out
+            </Button>
+          </Link>
+        </>
+      );
+    }
+  };
 
   return (
     <React.Fragment>
@@ -51,13 +86,14 @@ export default function Navbar() {
               <Link href={'/product'}>
                 <Button variant="ghost">Product</Button>
               </Link>
-
+              {/* 
               <Link href={'/login'}>
                 <Button variant="ghost">Sign in</Button>
               </Link>
               <Link href={'/register'}>
                 <Button variant="ghost">Sign up</Button>
-              </Link>
+              </Link> */}
+              {authNavbar()}
             </HStack>
             <Button colorScheme="brand" size="sm">
               Get Started
@@ -108,7 +144,7 @@ export default function Navbar() {
                     Product
                   </Button>
                 </Link>
-                <Link href="/login">
+                {/* <Link href="/login">
                   <Button w="full" variant="ghost">
                     Sign in
                   </Button>
@@ -117,7 +153,8 @@ export default function Navbar() {
                   <Button w="full" variant="ghost">
                     Sign up
                   </Button>
-                </Link>
+                </Link> */}
+                {authNavbar()}
               </VStack>
             </Box>
           </HStack>

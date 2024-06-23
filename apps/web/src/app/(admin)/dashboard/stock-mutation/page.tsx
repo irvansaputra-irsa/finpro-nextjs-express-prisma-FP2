@@ -1,12 +1,20 @@
 'use client';
+import { AuthContext } from '@/context/Auth';
 import {
   reqProductMutation,
   useRequestProductMutation,
 } from '@/hooks/useMutateMutation';
-import { useWarehouse } from '@/hooks/useWarehouse';
+import {
+  useFindWarehouseByAdmin,
+  useListWarehouse,
+  useWarehouse,
+} from '@/hooks/useWarehouse';
 import { useGetWarehouseStockOnMutationReq } from '@/hooks/useWarehouseStock';
 import { productStock } from '@/interface/stock.interface';
-import { warehouse } from '@/interface/warehouse.interface';
+import {
+  listWarehouseInterface,
+  warehouse,
+} from '@/interface/warehouse.interface';
 import { errorResponse } from '@/types/errorResponse';
 import {
   Box,
@@ -22,13 +30,27 @@ import {
   Input,
   Select,
   SimpleGrid,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
   Textarea,
+  Tfoot,
+  Th,
+  Thead,
+  Tr,
   useToast,
 } from '@chakra-ui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AsyncSelect, SelectInstance, SingleValue } from 'chakra-react-select';
-import { unset } from 'cypress/types/lodash';
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 type ProductOption = {
   value: string;
@@ -36,14 +58,30 @@ type ProductOption = {
 };
 
 export default function StockMutation() {
+  const users = useContext(AuthContext);
+  const userDetail = users.user;
+  //example karena blm bs dpt token user - notes token harusnya ada id user dan role usernya
+  //super admin
+  // const userId = 29;
+  // const userRole = 'super admin';
+
+  //admin biasa
   // 1. identify dulu dia itu super admin atau warehouse admin biasa
   // 2. kalo dia super admin, select formnya bebas
   // 3. kalo dia warehouse admin biasa, select formnya yg MUTATION FROM auto ke select warehouse dia sendiri
+  const { data: warehouseDetailByAdmin } = useFindWarehouseByAdmin(
+    Number(userDetail?.id),
+  );
+  const warehouseDetail: warehouse = warehouseDetailByAdmin?.data.data || null;
   // 4. dan select form MUTATION TO di filter dari value MUTATION FORMNYA
   // 5. LIST BOOK-nya dpt dari list warehouse tujuannya
   const toast = useToast();
-  const { data } = useWarehouse();
-  const listWarehouse: warehouse[] = data?.data.data || [];
+  const { data: warehouses } = useWarehouse();
+  const listWarehouse: warehouse[] = warehouses?.data.data || []; // list warehouse semuanya dulu
+  const fetchAvailableWarehouseAuth =
+    userDetail?.role === 'admin'
+      ? [...listWarehouse]?.filter((w) => w.id === warehouseDetail?.id)
+      : listWarehouse;
   const [selectFrom, setSelectFrom] = useState<string | ''>('');
   const [selectTo, setSelectTo] = useState<string | ''>('');
   const handleSelectFrom = (
@@ -143,6 +181,12 @@ export default function StockMutation() {
       },
     });
   };
+
+  //logic buat list mutationnya, get all list atau per warehouse admin
+  //get list warehouse buat di select option
+  const { data: lists } = useListWarehouse(userDetail?.token ?? '');
+  const listWarehouseOnly: listWarehouseInterface[] = lists?.data.data || [];
+
   return (
     <Box bgColor={'#fdfdfd'} p={5}>
       <Box my={3}>
@@ -151,8 +195,118 @@ export default function StockMutation() {
       <Divider my={5}></Divider>
       <Box>
         <SimpleGrid columns={{ base: 1, xl: 2 }}>
-          <Box h="10" bg="tomato" p={10}>
-            <Box></Box>
+          <Box bg="#FDFFE2" p={10}>
+            <Box>
+              <Box
+                display={'flex'}
+                justifyContent={'space-between'}
+                flexFlow={{ base: 'column-reverse', xl: 'row' }}
+              >
+                <Heading
+                  textAlign={{ base: 'center', '2xl': 'start' }}
+                  size={'2xl'}
+                  mb={7}
+                >
+                  Incoming Request
+                </Heading>
+                <Select
+                  placeholder="Select warehouse"
+                  w={'355px'}
+                  // value={selectWarehouseMutation}
+                >
+                  {listWarehouseOnly.map((warehouse) => (
+                    <option
+                      key={warehouse.id}
+                      value={warehouse.id}
+                    >{`${warehouse.warehouse_name} - ${warehouse.warehouse_city}`}</option>
+                  ))}
+                </Select>
+              </Box>
+              <TableContainer>
+                <Table variant="striped" colorScheme="teal">
+                  <Thead>
+                    <Tr>
+                      <Th>Request from (warehouse)</Th>
+                      <Th>Book Name</Th>
+                      <Th isNumeric>Quantity</Th>
+                      <Th>Action</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    <Tr>
+                      <Td>inches</Td>
+                      <Td>millimetres (mm)</Td>
+                      <Td isNumeric>25.4</Td>
+                      <Td>inches</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>feet</Td>
+                      <Td>centimetres (cm)</Td>
+                      <Td isNumeric>30.48</Td>
+                      <Td>inches</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>yards</Td>
+                      <Td>metres (m)</Td>
+                      <Td isNumeric>0.91444</Td>
+                      <Td>inches</Td>
+                    </Tr>
+                  </Tbody>
+                  <Tfoot>
+                    <Tr>
+                      <Th>To convert</Th>
+                      <Th>into</Th>
+                      <Th isNumeric>multiply by</Th>
+                      <Td>inches</Td>
+                    </Tr>
+                  </Tfoot>
+                </Table>
+              </TableContainer>
+            </Box>
+            <Box mt={20}>
+              <Heading
+                textAlign={{ base: 'center', '2xl': 'start' }}
+                size={'2xl'}
+                mb={7}
+              >
+                Outcoming Request
+              </Heading>
+              <TableContainer>
+                <Table variant="striped" colorScheme="teal">
+                  <Thead>
+                    <Tr>
+                      <Th>To convert</Th>
+                      <Th>into</Th>
+                      <Th isNumeric>multiply by</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    <Tr>
+                      <Td>inches</Td>
+                      <Td>millimetres (mm)</Td>
+                      <Td isNumeric>25.4</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>feet</Td>
+                      <Td>centimetres (cm)</Td>
+                      <Td isNumeric>30.48</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>yards</Td>
+                      <Td>metres (m)</Td>
+                      <Td isNumeric>0.91444</Td>
+                    </Tr>
+                  </Tbody>
+                  <Tfoot>
+                    <Tr>
+                      <Th>To convert</Th>
+                      <Th>into</Th>
+                      <Th isNumeric>multiply by</Th>
+                    </Tr>
+                  </Tfoot>
+                </Table>
+              </TableContainer>
+            </Box>
           </Box>
           <Box px={5}>
             <Box px={5} py={10} border={'2px dashed #FBDEBB'} borderRadius={10}>
@@ -169,11 +323,12 @@ export default function StockMutation() {
                       onChange={(e) => handleSelectFrom(e, 'from')}
                       value={selectFrom}
                     >
-                      {listWarehouse?.map((el) => (
-                        <option value={el.id} key={el.id}>
-                          {el.warehouse_name} - {el.warehouse_city}
-                        </option>
-                      ))}
+                      {fetchAvailableWarehouseAuth.length &&
+                        fetchAvailableWarehouseAuth?.map((el) => (
+                          <option value={el.id} key={el.id}>
+                            {el.warehouse_name} - {el.warehouse_city}
+                          </option>
+                        ))}
                     </Select>
                   </FormControl>
                   <FormControl>

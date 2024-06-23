@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 
 export const useGetWarehouseMutation = (id: number) => {
   return useQuery({
-    queryKey: ['mutation-request'],
+    queryKey: ['warehouse-mutation-request', { warehouse_id: id }],
     queryFn: async () => {
-      const res = await instance.get(`/mutation`);
+      const res = await instance.get(`/mutation?warehouse=${id}`);
       return res;
     },
   });

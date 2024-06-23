@@ -9,7 +9,7 @@ import {
   useUpdateProductMutation,
 } from '@/hooks/useProductMutation';
 import { useSearchParams } from 'next/navigation';
-import { useProduct } from '@/hooks/useProduct';
+import { useProductForm } from '@/hooks/useProduct';
 import { product, productImage } from '@/interface/product.interface';
 export interface FormValues {
   bookName: string;
@@ -42,7 +42,7 @@ export default function ProductForm() {
   const { mutate: updateProduct } = useUpdateProductMutation();
   const param = useSearchParams();
   const slugProduct = param?.get('product_name') || '';
-  const { data: book, isError: isErrFindProduct } = useProduct(slugProduct);
+  const { data: book, isError: isErrFindProduct } = useProductForm(slugProduct);
   const bookData: product = book?.data.data;
 
   useEffect(() => {

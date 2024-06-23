@@ -145,9 +145,11 @@ const SidebarContent = (props: BoxProps) => {
               Stock Management
             </NavItem>
           </Link>
-          <NavItem pl="12" py="2">
-            Stock Mutation
-          </NavItem>
+          <Link href={'/dashboard/stock-mutation'}>
+            <NavItem pl="12" py="2">
+              Stock Mutation
+            </NavItem>
+          </Link>
         </Collapse>
         <NavItem icon={RiUserSettingsFill}>Admin Management</NavItem>
         <NavItem icon={FaWarehouse} onClick={integrationsWarehouse.onToggle}>

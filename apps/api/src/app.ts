@@ -21,6 +21,8 @@ import { ProductRouter } from './routers/product.router';
 import { AuthRouter } from './routers/auth.router';
 import { StockRouter } from './routers/stock.router';
 import path from 'path';
+import { WarehouseRouter } from './routers/warehouse.router';
+import { MutationRouter } from './routers/mutation.router';
 
 export default class App {
   private app: Express;
@@ -73,6 +75,8 @@ export default class App {
     const authRouter = new AuthRouter();
     const rajaOngkirRouter = new RajaOngkirRouter();
     const stockRouter = new StockRouter();
+    const warehouseRouter = new WarehouseRouter();
+    const mutationRouter = new MutationRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -88,6 +92,8 @@ export default class App {
     this.app.use('/api/auth', authRouter.getRouter());
     this.app.use('/api/raja-ongkir', rajaOngkirRouter.getRouter());
     this.app.use('/api/stock', stockRouter.getRouter());
+    this.app.use('/api/warehouse', warehouseRouter.getRouter());
+    this.app.use('/api/mutation', mutationRouter.getRouter());
   }
 
   public start(): void {

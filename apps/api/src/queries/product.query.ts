@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { product } from '@/interfaces/product.interface';
 import prisma from '@/prisma';
-import { Book, BookImage } from '@prisma/client';
+import { Book, BookImage, Prisma } from '@prisma/client';
 import { join } from 'path';
 import fs from 'fs';
 
@@ -142,15 +142,81 @@ export class ProductQuery {
     }
   };
 
-  public getAllProductsQuery = async () => {
+  public getAllProductsQuery = async (
+    page: number,
+    limit: number,
+    category: string,
+    sortBy: string,
+    search: string,
+  ) => {
     try {
+      let sortOrder = [];
+      if (sortBy === 'newest') {
+        sortOrder.push({
+          created_at: 'desc',
+        });
+      } else if (sortBy === 'highest') {
+        sortOrder.push({
+          book_price: 'desc',
+        });
+      } else if (sortBy === 'lowest') {
+        sortOrder.push({
+          book_price: 'asc',
+        });
+      }
+      const totalDataInDatabase = await prisma.book.count();
+      const skipPage = (page - 1) * limit || 0;
+      const take = limit ?? totalDataInDatabase;
       const data = await prisma.book.findMany({
+        skip: skipPage,
+        take,
         include: {
           bookCategory: true,
         },
+        where: {
+          AND: [
+            {
+              bookCategory: {
+                book_category_name: {
+                  startsWith: category,
+                },
+              },
+            },
+            {
+              book_name: {
+                contains: search,
+              },
+            },
+          ],
+        },
+        orderBy: sortOrder,
       });
 
-      return data;
+      const allData = await prisma.book.findMany({
+        include: {
+          bookCategory: true,
+        },
+        where: {
+          bookCategory: {
+            book_category_name: {
+              startsWith: category,
+            },
+          },
+        },
+      });
+
+      const countData = allData.length;
+      const totalPages = Math.ceil(countData / limit) || 1;
+
+      const res = {
+        data,
+        page,
+        limit,
+        totalData: countData,
+        totalPages,
+      };
+
+      return res;
     } catch (error) {
       throw error;
     }
@@ -164,6 +230,7 @@ export class ProductQuery {
         },
         include: {
           BookImage: true,
+          bookCategory: true,
         },
       });
       return data;
@@ -252,6 +319,94 @@ export class ProductQuery {
         fs.unlinkSync(dir + '/' + del.book_image);
       }
       return del;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public getAllProductsDashboardQuery = async (
+    page: number,
+    limit: number,
+    category: string,
+    sortBy: string,
+    search: string,
+  ) => {
+    try {
+      let sortOrder = [];
+      if (sortBy === 'newest') {
+        sortOrder.push({
+          created_at: 'desc',
+        });
+      } else if (sortBy === 'highest') {
+        sortOrder.push({
+          book_price: 'desc',
+        });
+      } else if (sortBy === 'lowest') {
+        sortOrder.push({
+          book_price: 'asc',
+        });
+      }
+      const totalDataInDatabase = await prisma.book.count();
+      const skipPage = (page - 1) * limit || 0;
+      const take = limit ?? totalDataInDatabase;
+
+      const query = {
+        skip: skipPage,
+        take,
+        include: {
+          bookCategory: true,
+        },
+        where: {
+          AND: [
+            {
+              bookCategory: {
+                book_category_name: {
+                  startsWith: category,
+                },
+              },
+            },
+            {
+              OR: [
+                {
+                  book_name: {
+                    contains: search,
+                  },
+                },
+                {
+                  bookCategory: {
+                    book_category_name: {
+                      contains: search,
+                    },
+                  },
+                },
+                {
+                  book_author: {
+                    contains: search,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        orderBy: sortOrder,
+      } satisfies Prisma.BookFindManyArgs;
+
+      const [books, count] = await prisma.$transaction([
+        prisma.book.findMany(query),
+        prisma.book.count({ where: query.where }),
+      ]);
+
+      const totalPages = Math.ceil(count / limit) || 1;
+
+      const res = {
+        data: books,
+        page,
+        limit,
+        totalData: count,
+        totalPages,
+      };
+
+      return res;
     } catch (error) {
       throw error;
     }

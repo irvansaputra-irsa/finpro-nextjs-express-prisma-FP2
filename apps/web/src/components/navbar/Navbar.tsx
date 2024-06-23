@@ -4,7 +4,6 @@ import {
   Box,
   Flex,
   useColorModeValue,
-  VisuallyHidden,
   HStack,
   Button,
   useDisclosure,
@@ -49,9 +48,10 @@ export default function Navbar() {
                 md: 'inline-flex',
               }}
             >
-              <Button variant="ghost">Features</Button>
-              <Button variant="ghost">Pricing</Button>
-              <Button variant="ghost">Blog</Button>
+              <Link href={'/product'}>
+                <Button variant="ghost">Product</Button>
+              </Link>
+
               <Link href={'/login'}>
                 <Button variant="ghost">Sign in</Button>
               </Link>
@@ -103,16 +103,11 @@ export default function Navbar() {
                   aria-label="Close menu"
                   onClick={mobileNav.onClose}
                 />
-
-                <Button w="full" variant="ghost">
-                  Features
-                </Button>
-                <Button w="full" variant="ghost">
-                  Pricing
-                </Button>
-                <Button w="full" variant="ghost">
-                  Blog
-                </Button>
+                <Link href={'/product'}>
+                  <Button w="full" variant="ghost">
+                    Product
+                  </Button>
+                </Link>
                 <Link href="/login">
                   <Button w="full" variant="ghost">
                     Sign in

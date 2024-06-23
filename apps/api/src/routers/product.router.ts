@@ -22,6 +22,10 @@ export class ProductRouter {
       uploader('IMG', '/products').array('files', 5),
       this.productController.createProductController,
     );
+    this.router.get(
+      '/dashboard',
+      this.productController.getAllProductsDashboardController,
+    );
     this.router.delete('/:id', this.productController.deleteProductController);
     this.router.get('/', this.productController.getAllProductsController);
     this.router.get('/:bookName', this.productController.getProductController);
@@ -36,7 +40,6 @@ export class ProductRouter {
       this.productController.deleteProductImageController,
     );
   }
-
   getRouter(): Router {
     return this.router;
   }

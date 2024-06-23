@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
-import { ChakraProvider } from '@chakra-ui/react';
 import ReactQueryProvider from './utils/reactQueryProvider';
-
-const inter = Inter({ subsets: ['latin'] });
+import { Providers } from '@/utils/providerStyle';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -18,9 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <ReactQueryProvider>
-          <ChakraProvider>{children}</ChakraProvider>
+          <Providers>{children}</Providers>
         </ReactQueryProvider>
       </body>
     </html>

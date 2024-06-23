@@ -1,6 +1,6 @@
-import { HttpException } from '@/exceptions/http.exception';
 import { product } from '@/interfaces/product.interface';
 import { ProductQuery } from '@/queries/product.query';
+import { deleteHypeninString } from '@/utils/convert.utils';
 import { Book } from '@prisma/client';
 import Container, { Service } from 'typedi';
 
@@ -32,9 +32,24 @@ export class ProductService {
     }
   };
 
-  public getAllProductsService = async () => {
+  public getAllProductsService = async (
+    page: number,
+    limit: number,
+    category: string,
+    sortBy: string,
+    search: string,
+  ) => {
     try {
-      const data = await this.productQuery.getAllProductsQuery();
+      if (category.includes('-')) {
+        category = deleteHypeninString(category);
+      }
+      const data = await this.productQuery.getAllProductsQuery(
+        page,
+        limit,
+        category,
+        sortBy,
+        search,
+      );
       return data;
     } catch (error) {
       throw error;
@@ -66,6 +81,30 @@ export class ProductService {
   public deleteProductImageService = async (id: number) => {
     try {
       const data = await this.productQuery.deleteProductImageQuery(id);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public getAllProductsDashboardService = async (
+    page: number,
+    limit: number,
+    category: string,
+    sortBy: string,
+    search: string,
+  ) => {
+    try {
+      if (category.includes('-')) {
+        category = deleteHypeninString(category);
+      }
+      const data = await this.productQuery.getAllProductsDashboardQuery(
+        page,
+        limit,
+        category,
+        sortBy,
+        search,
+      );
       return data;
     } catch (error) {
       throw error;

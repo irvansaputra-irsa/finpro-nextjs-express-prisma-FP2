@@ -23,6 +23,7 @@ import {
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
@@ -60,7 +61,7 @@ export default function WarehouseStock() {
     return (
       <Box w={{ base: '100%', xl: '60%' }}>
         <Flex justifyContent={'space-between'}>
-          <Heading p={5}>Warehouse {warehouseId}</Heading>
+          <Heading p={5}>Book stock at warehouse</Heading>
           <Link
             alignSelf={'center'}
             href={`/dashboard/stock-management/warehouse/product?id=${warehouseId}`}
@@ -82,25 +83,33 @@ export default function WarehouseStock() {
               </Tr>
             </Thead>
             <Tbody>
-              {productList.map((el: any, idx: number) => (
-                <Tr key={idx}>
-                  <Td>{el?.book?.book_name}</Td>
-                  <Td>{el?.book?.bookCategory?.book_category_name}</Td>
-                  <Td isNumeric> {parseCurrency(el?.book?.book_price)}</Td>
-                  <Td>{el?.stockQty}</Td>
-                  <Td>{parseDateTime(el?.updated_at)}</Td>
-                  <Td>
-                    <Icon
-                      as={FaPlus}
-                      cursor={'pointer'}
-                      w={7}
-                      onClick={() => {
-                        openModal(el.id);
-                      }}
-                    />
+              {productList.length ? (
+                productList.map((el: any, idx: number) => (
+                  <Tr key={idx}>
+                    <Td>{el?.book?.book_name}</Td>
+                    <Td>{el?.book?.bookCategory?.book_category_name}</Td>
+                    <Td isNumeric> {parseCurrency(el?.book?.book_price)}</Td>
+                    <Td>{el?.stockQty}</Td>
+                    <Td>{parseDateTime(el?.updated_at)}</Td>
+                    <Td>
+                      <Icon
+                        as={FaPlus}
+                        cursor={'pointer'}
+                        w={7}
+                        onClick={() => {
+                          openModal(el.id);
+                        }}
+                      />
+                    </Td>
+                  </Tr>
+                ))
+              ) : (
+                <Tr>
+                  <Td textAlign={'center'} colSpan={100}>
+                    No data found
                   </Td>
                 </Tr>
-              ))}
+              )}
             </Tbody>
           </Table>
         </TableContainer>

@@ -15,85 +15,138 @@ import {
   Box,
   Spinner,
   Heading,
+  Input,
+  InputGroup,
+  InputRightElement,
 } from '@chakra-ui/react';
-import React from 'react';
-import { useProductDashboard } from '@/hooks/useProduct';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useProductListDashboard } from '@/hooks/useProduct';
 import { product } from '@/interface/product.interface';
 import { useProductDeleteMutation } from '@/hooks/useProductMutation';
-import { useRouter } from 'next/navigation';
-import { parseCurrency, separateStringHyphen } from '@/utils/convert';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { separateStringHyphen } from '@/utils/convert';
 import { Link } from '@chakra-ui/next-js';
+import Paginate from '@/components/pagination/paginate';
+import { useDebounce } from 'use-debounce';
+import { CiSearch } from 'react-icons/ci';
+import { setQueryUrl } from '@/utils/queryParam';
+import ProductTable from './components/productTable';
 
 export default function ProductList() {
-  const { data, isLoading } = useProductDashboard();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryParams = new URLSearchParams(searchParams);
+  const params = new URLSearchParams(searchParams);
+  const pageQuery = params.get('page') || 1;
+  const searchQuery = params.get('search') || '';
+  const sortQuery = params.get('sort') || '';
+  const [page, setPage] = useState<number>(Number(pageQuery));
+  const [sort, setSort] = useState<string>(sortQuery);
+  const [search, setSearch] = useState<string>(searchQuery);
+  const [debounceSearch] = useDebounce(search.trim(), 1000);
+  const limit = 10;
+  const { data, isPlaceholderData, isLoading } = useProductListDashboard(
+    page,
+    limit,
+    sort,
+    debounceSearch,
+  );
   const { mutate: mutateDelete } = useProductDeleteMutation();
-  const router = useRouter();
-  const productList: product[] = data?.data?.data || [];
+  const { replace, push } = useRouter();
+  const productList: product[] = data?.data?.data?.data || [];
+  const totalPages = data?.data.data.totalPages;
 
   const handleDeleteProduct = (id: number) => {
     mutateDelete(id);
   };
 
+  const handleClickButton = (type: string): void => {
+    if (type === 'next') {
+      setPage((old: number) => old + 1);
+      setQueryUrl(
+        queryParams,
+        pathname,
+        replace,
+        'page',
+        (page + 1).toString(),
+      );
+    }
+    if (type === 'prev') {
+      setPage((old: number) => Math.max(old - 1, 1));
+      setQueryUrl(
+        queryParams,
+        pathname,
+        replace,
+        'page',
+        (page - 1).toString(),
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (!debounceSearch) {
+      queryParams.delete('search');
+      replace(`${pathname}?${queryParams.toString()}`, {
+        scroll: false,
+      });
+    } else {
+      setQueryUrl(queryParams, pathname, replace, 'search', debounceSearch);
+    }
+  }, [debounceSearch]);
+
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    const currentSearch = e.target.value;
+    setSearch(currentSearch);
+    setPage(1);
+  };
+
+  const handleDetailProduct = (bookName: string) => {
+    push(
+      `/dashboard/product-form?product_name=${separateStringHyphen(bookName)}`,
+    );
+  };
+
   if (!isLoading) {
     return (
-      <Box w={{ base: '100%', xl: '70%' }}>
+      <Box mx="auto">
         <Flex justifyContent={'space-between'}>
-          <Heading p={5}>Product List</Heading>
-          <Link alignSelf={'center'} href={'/dashboard/product-form'}>
-            <Button>Insert a new book product</Button>
-          </Link>
+          <Box>
+            <Heading color={'orange'} fontSize={'4xl'} p={5}>
+              Book List
+            </Heading>
+          </Box>
+          <Flex>
+            <InputGroup my={'auto'} mr={5}>
+              <InputRightElement pointerEvents="none">
+                <CiSearch color="gray.300" />
+              </InputRightElement>
+              <Input
+                id="searchs"
+                type="text"
+                placeholder="Search"
+                onChange={(e) => handleSearch(e)}
+                value={search}
+              />
+            </InputGroup>
+            <Link alignSelf={'center'} href={'/dashboard/product-form'}>
+              <Button colorScheme="orange" variant={'outline'}>
+                Insert a new book product
+              </Button>
+            </Link>
+          </Flex>
         </Flex>
-        <TableContainer>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Category</Th>
-                <Th isNumeric>Price</Th>
-                <Th isNumeric>Action</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {productList.length &&
-                productList?.map(
-                  (
-                    { id, book_name, book_price, bookCategory },
-                    idx: number,
-                  ) => (
-                    <Tr key={idx}>
-                      <Td>{book_name}</Td>
-                      <Td>{bookCategory?.book_category_name}</Td>
-                      <Td isNumeric> {parseCurrency(book_price)}</Td>
-                      <Td isNumeric>
-                        <Flex justifyContent={'end'}>
-                          <Icon
-                            cursor={'pointer'}
-                            as={FaEdit}
-                            w={5}
-                            h={5}
-                            mr={3}
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/product-form?product_name=${separateStringHyphen(book_name)}`,
-                              )
-                            }
-                          />
-                          <Icon
-                            cursor={'pointer'}
-                            as={MdDelete}
-                            w={5}
-                            h={5}
-                            onClick={() => handleDeleteProduct(id)}
-                          />
-                        </Flex>
-                      </Td>
-                    </Tr>
-                  ),
-                )}
-            </Tbody>
-          </Table>
-        </TableContainer>
+        <ProductTable
+          handleDeleteProduct={handleDeleteProduct}
+          handleDetailProduct={handleDetailProduct}
+          productList={productList}
+        />
         <Flex mt={5} justifyContent={'end'}></Flex>
+        <Paginate
+          isPlaceholderData={isPlaceholderData}
+          page={page}
+          totalPages={totalPages}
+          handleClickButton={handleClickButton}
+        />
       </Box>
     );
   } else {

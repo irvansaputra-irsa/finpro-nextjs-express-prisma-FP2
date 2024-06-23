@@ -54,7 +54,21 @@ export class ProductController {
     next: NextFunction,
   ) => {
     try {
-      const data = await this.productService.getAllProductsService();
+      const { page, limit, category, sort, search } = req.query;
+      let data = {};
+      const pages = Number(page) || undefined;
+      const limits = Number(limit) || undefined;
+      const categories = category?.toString() || '';
+      const sortBy = sort?.toString() || '';
+      const searchs = search?.toString() || '';
+      data = await this.productService.getAllProductsService(
+        pages,
+        limits,
+        categories,
+        sortBy,
+        searchs,
+      );
+
       res.status(200).json({
         message: 'Get All Product Success',
         data,
@@ -120,6 +134,36 @@ export class ProductController {
       );
       res.status(200).json({
         message: 'Delete Product Image Success',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getAllProductsDashboardController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { page, limit, category, sort, search } = req.query;
+      let data = {};
+      const pages = Number(page) || undefined;
+      const limits = Number(limit) || undefined;
+      const categories = category?.toString() || '';
+      const sortBy = sort?.toString() || '';
+      const searchs = search?.toString() || '';
+      data = await this.productService.getAllProductsDashboardService(
+        pages,
+        limits,
+        categories,
+        sortBy,
+        searchs,
+      );
+
+      res.status(200).json({
+        message: 'Get All Product Success',
         data,
       });
     } catch (error) {

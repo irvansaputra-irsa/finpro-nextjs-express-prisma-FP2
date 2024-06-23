@@ -1,5 +1,5 @@
 import instance from '@/utils/axiosInstance';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 export const useProductCategory = () => {
   return useQuery({
@@ -21,7 +21,7 @@ export const useProductDashboard = () => {
   });
 };
 
-export const useProduct = (slug: string | undefined) => {
+export const useProductForm = (slug: string | undefined) => {
   return useQuery({
     queryKey: ['product', slug],
     queryFn: async () => {
@@ -44,5 +44,53 @@ export const useProductCategoryDetail = (slug: string | undefined) => {
       }
     },
     enabled: !!slug,
+  });
+};
+
+export const useProductListCustomer = (
+  page: number,
+  limit: number,
+  sort: string = '',
+  search: string = '',
+  categoryFilter: string = '',
+) => {
+  return useQuery({
+    queryKey: ['product-list', page, categoryFilter, sort, search],
+    queryFn: async () => {
+      const res = await instance.get(
+        `/product?page=${page}&limit=${limit}&category=${categoryFilter}&sort=${sort}&search=${search}`,
+      );
+      return res;
+    },
+    placeholderData: keepPreviousData,
+  });
+};
+
+export const useProductListDashboard = (
+  page: number,
+  limit: number,
+  sort: string = '',
+  search: string = '',
+  categoryFilter: string = '',
+) => {
+  return useQuery({
+    queryKey: ['product-list', page, categoryFilter, sort, search],
+    queryFn: async () => {
+      const res = await instance.get(
+        `/product/dashboard?page=${page}&limit=${limit}&category=${categoryFilter}&sort=${sort}&search=${search}`,
+      );
+      return res;
+    },
+    placeholderData: keepPreviousData,
+  });
+};
+
+export const useProductDetailCustomer = (bookName: string) => {
+  return useQuery({
+    queryKey: ['product-detail', bookName],
+    queryFn: async () => {
+      const res = await instance.get(`product/${bookName}`);
+      return res;
+    },
   });
 };

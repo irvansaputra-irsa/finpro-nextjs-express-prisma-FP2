@@ -44,6 +44,9 @@ model Address {
   city        String
   country     String
 
+  lat  String
+  long String
+
   user_id Int
   user    User @relation(fields: [user_id], references: [id])
 
@@ -84,39 +87,48 @@ model Transaction {
 model Warehouse {
   id                   Int    @id @default(autoincrement())
   warehouse_name       String
-  warehouse_longitude  String
-  warehouse_latitude   String
   warehouse_detail_loc String
   warehouse_city       String
   warehouse_province   String
+  lat                  String
+  long                 String
 
   warehouse_admin_id Int?             @unique
   user               User?            @relation(fields: [warehouse_admin_id], references: [id])
   Transaction        Transaction[]
   WarehouseStock     WarehouseStock[]
 
-  Pengeluaran MutationHistory[] @relation("pengeluaran")
-  Pemasukan   MutationHistory[] @relation("pemasukan")
+  senderMutation   Mutation[] @relation("sender")
+  receiverMutation Mutation[] @relation("receiver")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
-model MutationHistory {
-  id      Int @id @default(autoincrement())
-  from_id Int
-  to_id   Int
+model Mutation {
+  id                Int     @id @default(autoincrement())
+  from_warehouse_id Int
+  to_warehouse_id   Int
+  sender_name       String
+  receiver_name     String?
+  book_id           Int
+  quantity          Int
+  status            STATUS
+  sender_notes      String?
+  receiver_notes    String?
 
-  from_warehouse Warehouse @relation("pengeluaran", fields: [from_id], references: [id])
-  to_warehouse   Warehouse @relation("pemasukan", fields: [to_id], references: [id])
-
-  book_id  Int
-  quantity Int
-  status   Int
-  message  String?
+  from_warehouse Warehouse @relation("sender", fields: [from_warehouse_id], references: [id])
+  to_warehouse   Warehouse @relation("receiver", fields: [to_warehouse_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+enum STATUS {
+  PROCESSED
+  COMPLETED
+  REJECTED
+  CANCELED
 }
 
 model Book {
@@ -191,8 +203,8 @@ model JurnalStock {
 }
 
 enum TYPE {
-  Penambahan
-  Pengurangan
+  PLUS
+  MINUS
 }
 
 model CartItem {

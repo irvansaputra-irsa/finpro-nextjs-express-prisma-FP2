@@ -13,4 +13,9 @@ export interface addStock {
   stockAddition: number;
 }
 
-// export interface
+export interface updateStockMutation {
+  senderWarehouseId: number;
+  receiverWarehouseId: number;
+  bookId: number;
+  qty: number;
+}

@@ -11,6 +11,18 @@ export const useGetWarehouseStock = (id: number) => {
   });
 };
 
+export const useGetWarehouseStockOnMutationReq = (id: number) => {
+  const stockList = useQuery({
+    queryKey: ['warehouse-stock', id],
+    queryFn: async () => {
+      const res = await instance.get(`/stock/${id}`);
+      return res;
+    },
+    enabled: !!id,
+  });
+  return { data: stockList.data };
+};
+
 export const useGetAnotherProductOnWarehouse = (id: number) => {
   return useQuery({
     queryKey: ['list-warehouse-product'],

@@ -23,8 +23,7 @@ export interface FormProps {
 }
 
 export default function LoginPage() {
-  const { setUser } = useContext(AuthContext);
-  const in30Minutes = 1 / 48;
+  const { useLogin } = useContext(AuthContext);
   const router = useRouter();
   const toast = useToast();
   const loginSchema = Yup.object().shape({
@@ -36,11 +35,10 @@ export default function LoginPage() {
   const { mutate } = useLoginMutation({
     onSuccess: (data: any) => {
       const token = String(data?.data?.data?.token);
-      router.push('/');
-      Cookies.set('token', token, {
-        expires: in30Minutes,
-      });
-      setUser(parseJWT(token));
+      const userDetail = parseJWT(token);
+      useLogin(userDetail, token);
+      if (userDetail.role === 'user') router.push('/');
+      else router.push('/dashboard');
     },
     onError: (error: AxiosError) => {
       if (axios.isAxiosError<ValidationError, Record<string, unknown>>(error)) {

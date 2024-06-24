@@ -21,11 +21,7 @@ import Cookies from 'js-cookie';
 export default function Navbar() {
   const bg = useColorModeValue('white', 'gray.800');
   const mobileNav = useDisclosure();
-  const { user, setUser } = useContext(AuthContext);
-  const logout = () => {
-    Cookies.remove('token');
-    setUser(null);
-  };
+  const { user, useLogout } = useContext(AuthContext);
   const authNavbar = () => {
     if (!user) {
       return (
@@ -45,7 +41,7 @@ export default function Navbar() {
     } else {
       return (
         <>
-          <Link href="/login" onClick={() => logout()}>
+          <Link href="/login" onClick={() => useLogout()}>
             <Button w="full" variant="ghost">
               Log out
             </Button>

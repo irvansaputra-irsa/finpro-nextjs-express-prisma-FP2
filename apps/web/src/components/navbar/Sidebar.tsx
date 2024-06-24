@@ -16,11 +16,15 @@ import { MdHome, MdKeyboardArrowRight, MdInventory } from 'react-icons/md';
 import { GrTransaction } from 'react-icons/gr';
 import { RiUserSettingsFill } from 'react-icons/ri';
 import Logo from '../logo/logo';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useContext } from 'react';
 import { IconType } from 'react-icons';
 import Link from 'next/link';
+import { AuthContext } from '@/context/Auth';
+import { useRouter } from 'next/navigation';
 
 const SidebarContent = (props: BoxProps) => {
+  const { useLogout } = useContext(AuthContext);
+  const router = useRouter();
   const integrationsProduct = useDisclosure();
   const integrationsInventory = useDisclosure();
   const integrationsWarehouse = useDisclosure();
@@ -170,7 +174,15 @@ const SidebarContent = (props: BoxProps) => {
             Warehouse Admin
           </NavItem>
         </Collapse>
-        <NavItem icon={BiSolidLogOut}>Logout</NavItem>
+        <NavItem
+          icon={BiSolidLogOut}
+          onClick={() => {
+            useLogout();
+            router.push('/login');
+          }}
+        >
+          Logout
+        </NavItem>
       </Flex>
     </Box>
   );

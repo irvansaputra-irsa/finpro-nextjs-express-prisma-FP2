@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
 export class AuthMiddleware {
-  verifyToken = async (
+  public verifyToken = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -26,18 +26,18 @@ export class AuthMiddleware {
     }
   };
 
-  adminGuard = async (
+  public adminGuard = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
     try {
-      if (String(req.user?.role).toLowerCase() !== 'admin') {
+      if (!String(req.user?.role).toLowerCase().includes('admin')) {
         throw new HttpException(403, 'Forbidden Access');
       }
       next();
-    } catch (error) {
-      throw error;
+    } catch (err) {
+      next(err);
     }
   };
 }

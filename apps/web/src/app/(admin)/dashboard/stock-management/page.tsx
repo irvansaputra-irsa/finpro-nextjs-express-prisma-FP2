@@ -32,6 +32,7 @@ export default function StockList() {
       <SimpleGrid columns={3}>
         {warehouseList?.map((el, idx) => (
           <Box
+            key={idx}
             w={'80%'}
             minH={115}
             py={5}

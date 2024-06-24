@@ -1,13 +1,16 @@
 'use client';
 import { Flex, Image, Stack, useToast } from '@chakra-ui/react';
 import { withFormik } from 'formik';
-import React from 'react';
+import React, { useContext } from 'react';
 import * as Yup from 'yup';
 import InnerForm from './components/innerForm';
 import { useLoginMutation } from '@/hooks/useAuthMutation';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
 import { ValidationError } from '@/types/validationError';
+import Cookies from 'js-cookie';
+import { AuthContext } from '@/context/Auth';
+import parseJWT from '@/utils/parseJwt';
 
 export interface FormValues {
   userEmail: string;
@@ -20,6 +23,8 @@ export interface FormProps {
 }
 
 export default function LoginPage() {
+  const { setUser } = useContext(AuthContext);
+  const in30Minutes = 1 / 48;
   const router = useRouter();
   const toast = useToast();
   const loginSchema = Yup.object().shape({
@@ -30,9 +35,12 @@ export default function LoginPage() {
   });
   const { mutate } = useLoginMutation({
     onSuccess: (data: any) => {
+      const token = String(data?.data?.data?.token);
       router.push('/');
-      console.log(data);
-      localStorage.setItem('token', String(data?.data?.data?.token));
+      Cookies.set('token', token, {
+        expires: in30Minutes,
+      });
+      setUser(parseJWT(token));
     },
     onError: (error: AxiosError) => {
       if (axios.isAxiosError<ValidationError, Record<string, unknown>>(error)) {

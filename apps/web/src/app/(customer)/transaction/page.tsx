@@ -1,19 +1,18 @@
-// TODO 1. change warehouse id from hardcode
-// TODO 2. create button to proceed transaction along with multer
-
 'use client';
 
+import axios from 'axios';
 import {
   Box,
   Heading,
   Text,
-  Divider,
   VStack,
   useToast,
   Button,
   Input,
+  Image,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function TransactionPage() {
   const [cardId, setCartId] = useState<string>('');
@@ -23,7 +22,12 @@ export default function TransactionPage() {
   const [hargaTotal, setHargaTotal] = useState<number>(0);
   const toast = useToast();
   const [file, setFile] = useState<File | null>(null);
-  const paymentMethod = 'manual';
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleCancelButton = () => {
+    router.push('/cart');
+  };
 
   useEffect(() => {
     const storedCardId = window.sessionStorage.getItem('cardId');
@@ -61,9 +65,9 @@ export default function TransactionPage() {
     setHargaTotal(ongkir + buku);
   }, [hargaOngkir, hargaBuku]);
 
-  const handleFileChange = (event: any) => {
-    const file = event.target.files[0];
-    if (file.size > 1048576) {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files ? event.target.files[0] : null;
+    if (selectedFile && selectedFile.size > 1048576) {
       toast({
         title: 'File too large',
         description: 'The file size should be less than 1MB.',
@@ -72,11 +76,53 @@ export default function TransactionPage() {
         isClosable: true,
       });
     } else {
-      setFile(file);
+      setFile(selectedFile);
+      if (selectedFile) {
+        setFilePreview(URL.createObjectURL(selectedFile)); // Generate and set file preview URL
+      }
       toast({
         title: 'File accepted',
         description: 'The file has been successfully uploaded.',
         status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('myFile', file);
+
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/upload`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      toast({
+        title: 'Upload successful',
+        description: 'File uploaded successfully.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+
+      setTimeout(() => {
+        router.push('/cart');
+      }, 2000);
+    } catch (error: any) {
+      toast({
+        title: 'Upload failed',
+        description: `There was an error uploading the file: ${error.message}`,
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -109,7 +155,26 @@ export default function TransactionPage() {
         {file && (
           <Box mt={4}>
             <Text>Selected file: {file.name}</Text>
+            {filePreview && (
+              <Image
+                src={filePreview}
+                alt="Selected file preview"
+                boxSize="200px"
+                objectFit="cover"
+                mt={4}
+              />
+            )}
           </Box>
+        )}
+        {!file && (
+          <Button colorScheme="red" onClick={handleCancelButton}>
+            Cancel
+          </Button>
+        )}
+        {file && (
+          <Button colorScheme="green" onClick={handleUpload}>
+            Continue
+          </Button>
         )}
       </VStack>
     </Box>

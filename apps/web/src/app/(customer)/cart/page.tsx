@@ -88,6 +88,7 @@ export default function CartPage() {
           if (response.ok) {
             const data = await response.json();
             setAddress(data);
+            sessionStorage.setItem('selectedAddress', JSON.stringify(data));
           } else {
             throw new Error('Failed to fetch default address');
           }

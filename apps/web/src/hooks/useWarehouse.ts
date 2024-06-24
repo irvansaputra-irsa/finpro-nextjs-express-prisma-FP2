@@ -22,15 +22,12 @@ export const useFindWarehouseByAdmin = (id: number) => {
   });
 };
 
-export const useListWarehouse = (token: string) => {
+export const useListWarehouse = () => {
   return useQuery({
     queryKey: ['warehouse-list'],
     queryFn: async () => {
-      const res = await instance.get(`/warehouse/list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await instance.get(`/warehouse/list`);
       return res;
     },
-    enabled: !!token,
   });
 };

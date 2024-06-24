@@ -5,12 +5,12 @@ export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   if (!token) {
-    if (path.includes('/dashboard')) {
+    if (path.startsWith('/dashboard')) {
       return NextResponse.redirect(new URL('/login', req.url));
+    }
+  } else {
+    if (path.startsWith('/login') || path.startsWith('/register')) {
+      return NextResponse.redirect(new URL('/', req.url));
     }
   }
 }
-
-// export const config = {
-//   matcher: ["/dashboard/:path*", "/about/:path*"],
-// };

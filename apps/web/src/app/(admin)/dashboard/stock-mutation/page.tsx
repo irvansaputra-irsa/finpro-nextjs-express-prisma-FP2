@@ -184,7 +184,7 @@ export default function StockMutation() {
 
   //logic buat list mutationnya, get all list atau per warehouse admin
   //get list warehouse buat di select option
-  const { data: lists } = useListWarehouse(userDetail?.token ?? '');
+  const { data: lists } = useListWarehouse();
   const listWarehouseOnly: listWarehouseInterface[] = lists?.data.data || [];
 
   return (

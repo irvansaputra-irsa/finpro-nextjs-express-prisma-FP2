@@ -20,6 +20,7 @@ import { ErrorMiddleware } from './middlewares/error.middleware';
 import { ProductRouter } from './routers/product.router';
 import { AuthRouter } from './routers/auth.router';
 import { StockRouter } from './routers/stock.router';
+import { UploadRouter } from './routers/uploadTransaction.router';
 import path from 'path';
 import { WarehouseRouter } from './routers/warehouse.router';
 import { MutationRouter } from './routers/mutation.router';
@@ -80,6 +81,7 @@ export default class App {
     const authRouter = new AuthRouter();
     const rajaOngkirRouter = new RajaOngkirRouter();
     const stockRouter = new StockRouter();
+    const uploadRouter = new UploadRouter();
     const warehouseRouter = new WarehouseRouter();
     const mutationRouter = new MutationRouter();
 
@@ -97,6 +99,7 @@ export default class App {
     this.app.use('/api/auth', authRouter.getRouter());
     this.app.use('/api/raja-ongkir', rajaOngkirRouter.getRouter());
     this.app.use('/api/stock', stockRouter.getRouter());
+    this.app.use('/api', uploadRouter.getRouter());
     this.app.use('/api/warehouse', warehouseRouter.getRouter());
     this.app.use('/api/mutation', mutationRouter.getRouter());
   }

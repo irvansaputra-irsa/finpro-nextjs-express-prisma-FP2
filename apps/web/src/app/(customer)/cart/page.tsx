@@ -58,12 +58,50 @@ export default function CartPage() {
     return false;
   };
 
-  const handlePaymentClick = () => {
+  const handlePaymentClick = async () => {
+    const isStockSufficient = await checkStockAvailability();
+
+    if (!isStockSufficient) {
+      toast({
+        title: 'Insufficient stock',
+        description: 'One or more items in your cart are out of stock.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     router.push('/transaction');
   };
 
   const handleChangeAddressClick = () => {
     router.push('/deliveryaddress');
+  };
+
+  const checkStockAvailability = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/cart/check-stock`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ cartId }),
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.isStockSufficient;
+      } else {
+        throw new Error('Failed to check stock availability');
+      }
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   };
 
   const [address, setAddress] = useState<Address | null>(null);
@@ -242,13 +280,6 @@ export default function CartPage() {
         if (response.ok) {
           const data = await response.json();
           console.log(data);
-          // const costReg = data.rajaongkir.results[0].costs[0].cost[0].value;
-          // const costOke = data.rajaongkir.results[0].costs[1].cost[0].value;
-          // const costYes = data.rajaongkir.results[0].costs[2].cost[0].value;
-
-          // setShippingReg(costReg);
-          // setShippingOke(costOke);
-          // setShippingYes(costYes);
 
           setShippingOptions(data.rajaongkir.results[0].costs);
 
@@ -338,7 +369,7 @@ export default function CartPage() {
             size="lg"
             w="full"
             display={{ sm: 'none', md: 'none', lg: 'block' }}
-            onClick={() => {
+            onClick={async () => {
               if (checkIsCartEmpty()) {
                 toast({
                   title: 'Cart is empty',
@@ -349,6 +380,20 @@ export default function CartPage() {
                   isClosable: true,
                 });
               } else {
+                const isStockSufficient = await checkStockAvailability();
+
+                if (!isStockSufficient) {
+                  toast({
+                    title: 'Insufficient stock',
+                    description:
+                      'One or more items in your cart are out of stock.',
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                  return;
+                }
+
                 handlePaymentClick();
               }
             }}

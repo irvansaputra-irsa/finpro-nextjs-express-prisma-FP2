@@ -70,7 +70,8 @@ model Transaction {
   id                Int      @id @default(autoincrement())
   status            String
   payment_method    String
-  confirmation_date DateTime
+  payment_proof     String
+  confirmation_date DateTime?
   final_price       Float
   destination_id    Int
 

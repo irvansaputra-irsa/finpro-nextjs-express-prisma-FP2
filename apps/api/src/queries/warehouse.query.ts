@@ -1,15 +1,26 @@
 import prisma from '@/prisma';
-import { Warehouse } from '@prisma/client';
+import { Warehouse, WarehouseStock } from '@prisma/client';
 import { Service } from 'typedi';
 
 @Service()
 export class WarehouseQuery {
-  public getAllWarehouseQuery = async (): Promise<Warehouse[]> => {
+  public getAllWarehouseQuery = async (
+    restricted: boolean,
+    role: string,
+    id: number,
+  ): Promise<Warehouse[]> => {
     try {
+      let whereClause = {};
+      if (restricted && role === 'admin') {
+        whereClause = {
+          warehouse_admin_id: id,
+        };
+      }
       const data = await prisma.warehouse.findMany({
         include: {
           user: true,
         },
+        where: whereClause,
       });
       return data;
     } catch (error) {
@@ -51,5 +62,44 @@ export class WarehouseQuery {
     } catch (error) {
       throw error;
     }
+  };
+
+  public findListWarehouseByProduct = async (
+    bookId: number,
+    warehouseId: number,
+  ) => {
+    try {
+      const query = bookId
+        ? {
+            AND: [
+              {
+                book_id: bookId,
+              },
+              {
+                stockQty: {
+                  gt: 0,
+                },
+              },
+            ],
+            NOT: {
+              warehouse_id: warehouseId,
+            },
+          }
+        : {};
+      const listBook = await prisma.warehouseStock.findMany({
+        where: query,
+        include: {
+          warehouse: true,
+        },
+      });
+      return listBook;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public findWarehouseById = async () => {
+    try {
+    } catch (error) {}
   };
 }

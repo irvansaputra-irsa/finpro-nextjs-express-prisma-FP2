@@ -52,7 +52,7 @@ export class ProductQuery {
     files: Express.Multer.File[],
   ) => {
     try {
-      const t = await prisma.$transaction(async () => {
+      const transactions = await prisma.$transaction(async () => {
         try {
           const {
             book_name,
@@ -97,7 +97,7 @@ export class ProductQuery {
           throw error;
         }
       });
-      return t;
+      return transactions;
     } catch (error) {
       throw error;
     }
@@ -105,7 +105,7 @@ export class ProductQuery {
 
   public deleteProductQuery = async (id: number) => {
     try {
-      const t = await prisma.$transaction(async () => {
+      const transactions = await prisma.$transaction(async () => {
         try {
           // get list images of product
           const imageList = await prisma.bookImage.findMany({
@@ -136,7 +136,7 @@ export class ProductQuery {
           throw error;
         }
       });
-      return t;
+      return transactions;
     } catch (error) {
       throw error;
     }
@@ -231,9 +231,22 @@ export class ProductQuery {
         include: {
           BookImage: true,
           bookCategory: true,
+          WarehouseStock: true,
         },
       });
-      return data;
+
+      const countStock = await prisma.warehouseStock.groupBy({
+        by: ['book_id'],
+        _sum: {
+          stockQty: true,
+        },
+        where: {
+          book: {
+            book_name,
+          },
+        },
+      });
+      return { ...data, current_stock: countStock[0]?._sum?.stockQty || 0 };
     } catch (error) {
       throw error;
     }
@@ -244,7 +257,7 @@ export class ProductQuery {
     files: Express.Multer.File[],
   ) => {
     try {
-      const t = await prisma.$transaction(async () => {
+      const transactions = await prisma.$transaction(async () => {
         try {
           const {
             id,
@@ -301,7 +314,7 @@ export class ProductQuery {
           throw error;
         }
       });
-      return t;
+      return transactions;
     } catch (error) {
       throw error;
     }

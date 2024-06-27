@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   Divider,
-  Fade,
   Flex,
   Heading,
   Icon,
@@ -35,6 +34,7 @@ export default function ProductDetailPage({
   const { data } = useProductDetailCustomer(bookName);
   const bookData: product = data?.data.data || undefined;
   const bookImage = bookData?.BookImage || [];
+  const bookStock = bookData?.current_stock || 0;
   const [mainImage, setMainImage] = useState<string>(bookImage[0]?.book_image);
   const [totalQty, setTotalQty] = useState<number>(0);
   useEffect(() => {
@@ -67,10 +67,23 @@ export default function ProductDetailPage({
     } catch (error) {}
   };
 
+  // handleAddCart
+
   return (
-    <Box maxW={'1440px'} mx={'auto'} py={12} px={10}>
-      <Flex>
-        <Box mr={5}>
+    <Box
+      maxW={'1440px'}
+      minH={'60vh'}
+      mx={'auto'}
+      py={12}
+      px={10}
+      bgColor={'#F7F9F2'}
+    >
+      <Flex
+        gap={10}
+        alignItems={'center'}
+        direction={{ base: 'column', lg: 'row' }}
+      >
+        <Box>
           <Box width={'403px'}>
             <Image
               maxW={'full'}
@@ -99,9 +112,9 @@ export default function ProductDetailPage({
             </SimpleGrid>
           </Box>
         </Box>
-        <Box mr={10}>
+        <Box w={{ base: 'full', md: 500 }}>
           <Text fontSize={'sm'}>{bookData?.book_author}</Text>
-          <Text fontSize={'lg'} fontWeight={'bold'}>
+          <Text fontSize={'xl'} fontWeight={'bold'}>
             {bookData?.book_name}
           </Text>
           <Text color={'orange'} fontSize={'lg'}>
@@ -109,7 +122,7 @@ export default function ProductDetailPage({
           </Text>
           <Box mt={5}>
             <Heading size={'md'} mb={3}>
-              Deskripsi Buku
+              Book Description
             </Heading>
             <Text textAlign={'justify'} noOfLines={simpleDesc ? 4 : undefined}>
               {bookData?.book_description}
@@ -130,7 +143,7 @@ export default function ProductDetailPage({
             <Heading mb={3} size={'md'}>
               Detail
             </Heading>
-            <SimpleGrid columns={2} spacing={5}>
+            <SimpleGrid columns={[1, 2]} gap={[5, 15, 10]}>
               <Box height={'40px'}>
                 <Text fontSize={'md'} color={'gray.600'}>
                   Publisher
@@ -166,7 +179,16 @@ export default function ProductDetailPage({
             </SimpleGrid>
           </Box>
         </Box>
-        <Box w={'250px'}>
+        <Box
+          w={{ base: 'full', md: '50%', lg: '300px' }}
+          bgColor={'#F7DCB9'}
+          px={10}
+          py={5}
+          borderRadius={20}
+          boxShadow={
+            'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'
+          }
+        >
           <Stack>
             <Text fontSize={'lg'} color={'gray.600'} fontWeight={'bold'}>
               Buy product
@@ -174,7 +196,7 @@ export default function ProductDetailPage({
             <Text fontSize={'sm'} fontWeight={'semibold'}>
               Total product
             </Text>
-            <Flex w={'50%'} justifyContent={'space-between'}>
+            <Flex w={'80%'} justifyContent={'space-between'}>
               <Box
                 mt={1}
                 cursor={'pointer'}
@@ -195,7 +217,9 @@ export default function ProductDetailPage({
               <Box
                 mt={1}
                 cursor={'pointer'}
-                onClick={() => setTotalQty((prev) => prev + 1)}
+                onClick={() =>
+                  totalQty < bookStock && setTotalQty((prev) => prev + 1)
+                }
               >
                 <Icon
                   bg={'orange'}
@@ -205,6 +229,9 @@ export default function ProductDetailPage({
                   h={'18px'}
                   borderRadius={'10px'}
                 />
+              </Box>
+              <Box>
+                <Text as={'i'}>stock: {bookData?.current_stock || 0}</Text>
               </Box>
             </Flex>
             <Divider />
@@ -218,7 +245,7 @@ export default function ProductDetailPage({
               <Button
                 colorScheme={'orange'}
                 leftIcon={<FaCartArrowDown color="orange" />}
-                rounded={'18px'}
+                rounded={'17px'}
                 variant={'outline'}
                 onClick={handleAddCart}
                 isDisabled={totalQty <= 0}

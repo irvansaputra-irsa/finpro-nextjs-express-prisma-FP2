@@ -1,3 +1,5 @@
+import { Warehouse, WarehouseStock } from '@prisma/client';
+
 export interface warehouseStock {
   bookId: number;
   warehouseId: number;
@@ -18,4 +20,8 @@ export interface updateStockMutation {
   receiverWarehouseId: number;
   bookId: number;
   qty: number;
+}
+
+export interface WarehouseStockWithWarehouse extends WarehouseStock {
+  warehouse: Warehouse; // Include Warehouse relation
 }

@@ -23,7 +23,8 @@ import { AuthContext } from '@/context/Auth';
 import { useRouter } from 'next/navigation';
 
 const SidebarContent = (props: BoxProps) => {
-  const { useLogout } = useContext(AuthContext);
+  const { useLogout, user } = useContext(AuthContext);
+  const userRole = user?.role;
   const router = useRouter();
   const integrationsProduct = useDisclosure();
   const integrationsInventory = useDisclosure();
@@ -155,25 +156,34 @@ const SidebarContent = (props: BoxProps) => {
             </NavItem>
           </Link>
         </Collapse>
-        <NavItem icon={RiUserSettingsFill}>Admin Management</NavItem>
-        <NavItem icon={FaWarehouse} onClick={integrationsWarehouse.onToggle}>
-          Warehouse
-          <Icon
-            as={MdKeyboardArrowRight}
-            ml="auto"
-            transform={
-              (integrationsWarehouse?.isOpen && 'rotate(90deg)') || undefined
-            }
-          />
-        </NavItem>
-        <Collapse in={integrationsWarehouse.isOpen}>
-          <NavItem pl="12" py="2">
-            Warehouse Management
-          </NavItem>
-          <NavItem pl="12" py="2">
-            Warehouse Admin
-          </NavItem>
-        </Collapse>
+        {userRole === 'super admin' && (
+          <>
+            <NavItem icon={RiUserSettingsFill}>Admin Management</NavItem>
+            <NavItem
+              icon={FaWarehouse}
+              onClick={integrationsWarehouse.onToggle}
+            >
+              Warehouse
+              <Icon
+                as={MdKeyboardArrowRight}
+                ml="auto"
+                transform={
+                  (integrationsWarehouse?.isOpen && 'rotate(90deg)') ||
+                  undefined
+                }
+              />
+            </NavItem>
+            <Collapse in={integrationsWarehouse.isOpen}>
+              <NavItem pl="12" py="2">
+                Warehouse Management
+              </NavItem>
+              <NavItem pl="12" py="2">
+                Warehouse Admin
+              </NavItem>
+            </Collapse>
+          </>
+        )}
+
         <NavItem
           icon={BiSolidLogOut}
           onClick={() => {

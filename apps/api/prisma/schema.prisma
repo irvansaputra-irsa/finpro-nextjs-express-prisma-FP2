@@ -119,6 +119,7 @@ model Mutation {
 
   from_warehouse Warehouse @relation("sender", fields: [from_warehouse_id], references: [id])
   to_warehouse   Warehouse @relation("receiver", fields: [to_warehouse_id], references: [id])
+  book           Book      @relation(fields: [book_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -134,7 +135,7 @@ enum STATUS {
 model Book {
   id                  Int    @id @default(autoincrement())
   book_name           String @unique
-  book_description    String
+  book_description    String @db.LongText
   book_author         String
   book_publisher      String
   book_published_year Int
@@ -151,6 +152,7 @@ model Book {
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
   CartItem   CartItem[]
+  Mutation   Mutation[]
 }
 
 model BookImage {
@@ -199,7 +201,10 @@ model JurnalStock {
   type TYPE
 
   warehouseStockId Int
-  warehouseStock   WarehouseStock @relation(fields: [warehouseStockId], references: [id])
+  warehouseStock   WarehouseStock @relation(fields: [warehouseStockId], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 enum TYPE {

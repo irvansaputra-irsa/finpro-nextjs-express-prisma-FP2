@@ -1,11 +1,12 @@
 import { jurnal, mutationJurnal } from '@/interfaces/jurnal.interfaces';
 import {
+  WarehouseStockWithWarehouse,
   addStock,
   updateStockMutation,
   warehouseStock,
 } from '@/interfaces/stock.interface';
 import prisma from '@/prisma';
-import { Book, WarehouseStock } from '@prisma/client';
+import { Book, Warehouse, WarehouseStock } from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { JurnalQuery } from './jurnal.query';
 
@@ -16,7 +17,7 @@ export class StockQuery {
     param: warehouseStock,
   ): Promise<WarehouseStock> => {
     try {
-      const t = await prisma.$transaction(async () => {
+      const transactions = await prisma.$transaction(async () => {
         try {
           const { bookId, warehouseId, qty } = param;
           //1. check apakah udah di add ke warehousenya product ini
@@ -43,17 +44,22 @@ export class StockQuery {
           throw error;
         }
       });
-      return t;
+      return transactions;
     } catch (error) {
       throw error;
     }
   };
 
-  public checkWarehouseStock = async (id: number): Promise<WarehouseStock> => {
+  public checkWarehouseStockByWarehouse = async (
+    warehouseId: number,
+  ): Promise<WarehouseStockWithWarehouse> => {
     try {
       const wStock = await prisma.warehouseStock.findFirst({
         where: {
-          id,
+          warehouse_id: warehouseId,
+        },
+        include: {
+          warehouse: true,
         },
       });
       return wStock;
@@ -64,7 +70,7 @@ export class StockQuery {
 
   public addStockQuery = async (param: addStock): Promise<jurnal> => {
     try {
-      const t = await prisma.$transaction(async () => {
+      const transactions = await prisma.$transaction(async () => {
         try {
           const { id, stockAddition } = param;
           //1. find productnya udah ada di warehouse atau blm sebelum ditambahkan
@@ -115,7 +121,7 @@ export class StockQuery {
           throw error;
         }
       });
-      return t;
+      return transactions;
     } catch (error) {
       throw error;
     }
@@ -250,6 +256,59 @@ export class StockQuery {
           throw error;
         }
       });
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public updateStockAfterTransactionQuery = async ({
+    oldQty,
+    newQty,
+    stockId,
+    transId,
+  }) => {
+    try {
+      const updateInventory = await prisma.warehouseStock.update({
+        where: {
+          id: stockId,
+        },
+        data: {
+          stockQty: newQty,
+        },
+        include: {
+          book: true,
+        },
+      });
+
+      //catat jurnal pengurangannya
+
+      await prisma.jurnalStock.create({
+        data: {
+          oldStock: oldQty,
+          newStock: newQty,
+          stockChange: Math.abs(newQty - oldQty),
+          type: 'MINUS',
+          warehouseStockId: stockId,
+          message: `${updateInventory.book.book_name} out for order in TransactionID : ${transId}`,
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public deleteProductStockQuery = async (id: number) => {
+    try {
+      const check = await prisma.warehouseStock.findFirst({
+        where: { id },
+      });
+      if (!check) throw new Error('Product is not exist anymore');
+      const deleteProduct = await prisma.warehouseStock.delete({
+        where: {
+          id,
+        },
+      });
+      return deleteProduct;
     } catch (error) {
       throw error;
     }

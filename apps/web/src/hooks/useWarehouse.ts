@@ -1,11 +1,11 @@
 import instance from '@/utils/axiosInstance';
 import { useQuery } from '@tanstack/react-query';
 
-export const useWarehouse = () => {
+export const useWarehouse = (restricted: boolean = false) => {
   return useQuery({
     queryKey: ['warehouse'],
     queryFn: async () => {
-      const res = await instance.get(`/warehouse`);
+      const res = await instance.get(`/warehouse?restricted=${restricted}`);
       return res;
     },
   });

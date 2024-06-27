@@ -15,9 +15,16 @@ export class WarehouseRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', this.warehouseController.getAllWarehouseController);
+    this.router.get(
+      '/',
+      this.authMiddleware.verifyToken,
+      this.authMiddleware.adminGuard,
+      this.warehouseController.getAllWarehouseController,
+    );
     this.router.get(
       '/admin/:id',
+      this.authMiddleware.verifyToken,
+      this.authMiddleware.adminGuard,
       this.warehouseController.findWarehouseByUserController,
     );
     this.router.get(

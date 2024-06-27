@@ -1,7 +1,10 @@
+import { HttpException } from '@/exceptions/http.exception';
 import { jurnal } from '@/interfaces/jurnal.interfaces';
 import { warehouseStock, addStock } from '@/interfaces/stock.interface';
 import { ProductQuery } from '@/queries/product.query';
 import { StockQuery } from '@/queries/stock.query';
+import { WarehouseQuery } from '@/queries/warehouse.query';
+import { User } from '@/types/express';
 import { Book, WarehouseStock } from '@prisma/client';
 import Container, { Service } from 'typedi';
 
@@ -9,6 +12,7 @@ import Container, { Service } from 'typedi';
 export class StockService {
   stockQuery = Container.get(StockQuery);
   productQuery = Container.get(ProductQuery);
+  warehouseQuery = Container.get(WarehouseQuery);
   public addProductToWarehouseStockService = async (
     param: warehouseStock,
   ): Promise<WarehouseStock> => {
@@ -42,14 +46,25 @@ export class StockService {
   };
 
   public fetchAllProductAtSelectedWarehouseService = async (
-    id: number,
+    warehouseId: number,
+    user: User,
   ): Promise<WarehouseStock[]> => {
     try {
       // 1. cek di WAREHOUSE admin tsb atau bukan
       // super admin trabas aja
+      if (user?.role === 'admin') {
+        const warehouse = await this.warehouseQuery.findWarehouseByUserQuery(
+          user?.id,
+        );
+        if (warehouse?.id !== warehouseId) {
+          throw new HttpException(403, 'Unauthorized');
+        }
+      }
       // 2. baru insert qtynya sesuai warehouse id dan product id
       const data =
-        await this.stockQuery.fetchAllProductAtSelectedWarehouseQuery(id);
+        await this.stockQuery.fetchAllProductAtSelectedWarehouseQuery(
+          warehouseId,
+        );
       return data;
     } catch (error) {
       throw error;
@@ -64,6 +79,15 @@ export class StockService {
       // super admin trabas aja
       // 2. baru insert qtynya sesuai warehouse id dan product id
       const data = await this.stockQuery.fetchProductNotAddedYetQuery(id);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public deleteProductStockService = async (id: number) => {
+    try {
+      const data = await this.stockQuery.deleteProductStockQuery(id);
       return data;
     } catch (error) {
       throw error;

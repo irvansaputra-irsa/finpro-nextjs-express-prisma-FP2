@@ -1,3 +1,5 @@
+// TODO: 1. change warehouse id to nearest warehouse
+
 'use client';
 
 import axios from 'axios';
@@ -78,7 +80,7 @@ export default function TransactionPage() {
     } else {
       setFile(selectedFile);
       if (selectedFile) {
-        setFilePreview(URL.createObjectURL(selectedFile)); // Generate and set file preview URL
+        setFilePreview(URL.createObjectURL(selectedFile));
       }
       toast({
         title: 'File accepted',
@@ -93,11 +95,11 @@ export default function TransactionPage() {
   const handleUpload = async () => {
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('myFile', file);
-
     try {
-      const response = await axios.post(
+      const formData = new FormData();
+      formData.append('myFile', file);
+
+      const uploadResponse = await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_API_URL}/upload`,
         formData,
         {
@@ -107,21 +109,42 @@ export default function TransactionPage() {
         },
       );
 
+      const paymentProofUrl = uploadResponse.data.file.filename;
+      console.log('this is payment proof');
+      console.log(paymentProofUrl);
+
+      const transactionData = {
+        status: 'waiting approval',
+        payment_method: 'upload proof',
+        payment_proof: paymentProofUrl,
+        confirmation_date: null,
+        final_price: hargaTotal,
+        destination_id: parseInt(addrId),
+        warehouse_id: 1,
+        cart_id: parseInt(cardId),
+      };
+
+      const transactionResponse = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/transaction`,
+        transactionData,
+      );
+
       toast({
-        title: 'Upload successful',
-        description: 'File uploaded successfully.',
+        title: 'Transaction successful',
+        description: 'Transaction created successfully.',
         status: 'success',
         duration: 5000,
         isClosable: true,
       });
 
       setTimeout(() => {
-        router.push('/cart');
+        router.push('/');
       }, 2000);
     } catch (error: any) {
+      console.error('Error details:', error.response.data);
       toast({
-        title: 'Upload failed',
-        description: `There was an error uploading the file: ${error.message}`,
+        title: 'Upload or Transaction failed',
+        description: `There was an error: ${error.message}`,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -135,8 +158,6 @@ export default function TransactionPage() {
         <Heading as="h1" size="xl" mb={4} borderBottom="2px solid">
           Transaction
         </Heading>
-        <Text>Card id {cardId}</Text>
-        <Text>Address id {addrId}</Text>
         <Text fontSize="xl">Total Price: Rp {hargaTotal}</Text>
         <Box>
           <Button as="label" cursor="pointer">

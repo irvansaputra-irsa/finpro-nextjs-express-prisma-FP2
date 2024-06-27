@@ -14,6 +14,8 @@ export class TransactionRouter {
 
   private initializeRouter(): void {
     this.router.post('/', this.transactionController.createTransaction);
+    this.router.post('/fetch', this.transactionController.getUserTransactions);
+    this.router.post('/confirm', this.transactionController.confirmOrder);
   }
 
   getRouter(): Router {

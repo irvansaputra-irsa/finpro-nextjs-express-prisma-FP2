@@ -16,6 +16,11 @@ export class TransactionRouter {
     this.router.post('/', this.transactionController.createTransaction);
     this.router.post('/fetch', this.transactionController.getUserTransactions);
     this.router.post('/confirm', this.transactionController.confirmOrder);
+    this.router.post(
+      '/update-status',
+      this.transactionController.updateTransactionStatus,
+    );
+    this.router.post('/admin', this.transactionController.getAdminTransactions);
   }
 
   getRouter(): Router {

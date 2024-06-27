@@ -24,6 +24,7 @@ import { UploadRouter } from './routers/uploadTransaction.router';
 import path from 'path';
 import { WarehouseRouter } from './routers/warehouse.router';
 import { MutationRouter } from './routers/mutation.router';
+import { TransactionRouter } from './routers/transaction.router';
 
 export default class App {
   private app: Express;
@@ -84,6 +85,7 @@ export default class App {
     const uploadRouter = new UploadRouter();
     const warehouseRouter = new WarehouseRouter();
     const mutationRouter = new MutationRouter();
+    const transactionRouter = new TransactionRouter();
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
@@ -102,6 +104,7 @@ export default class App {
     this.app.use('/api', uploadRouter.getRouter());
     this.app.use('/api/warehouse', warehouseRouter.getRouter());
     this.app.use('/api/mutation', mutationRouter.getRouter());
+    this.app.use('/api/transaction', transactionRouter.getRouter());
   }
 
   public start(): void {

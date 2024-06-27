@@ -38,4 +38,28 @@ export class CartQuery {
       throw error;
     }
   };
+
+  public async checkStock(cartId: number) {
+    const cartItems = await prisma.cartItem.findMany({
+      where: { cart_id: cartId },
+      include: { book: true },
+    });
+
+    for (const item of cartItems) {
+      const bookStock = await prisma.warehouseStock.findMany({
+        where: { book_id: item.book_id },
+      });
+
+      const totalStock = bookStock.reduce(
+        (acc, stock) => acc + stock.stockQty,
+        0,
+      );
+
+      if (totalStock < item.quantity) {
+        throw new Error(`Insufficient stock for book ID ${item.book_id}`);
+      }
+    }
+
+    return true;
+  }
 }

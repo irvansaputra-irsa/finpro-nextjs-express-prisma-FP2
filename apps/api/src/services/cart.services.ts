@@ -16,4 +16,14 @@ export class CartService {
       throw error;
     }
   };
+
+  public checkStock = async (cartId: number): Promise<boolean> => {
+    try {
+      const data = await this.cartQueries.checkStock(cartId);
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

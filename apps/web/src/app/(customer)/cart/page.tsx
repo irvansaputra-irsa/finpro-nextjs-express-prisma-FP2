@@ -13,6 +13,7 @@ import {
   RadioGroup,
   Stack,
   Button,
+  useToast,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
@@ -48,6 +49,14 @@ interface ShippingOption {
 
 export default function CartPage() {
   const router = useRouter();
+  const toast = useToast();
+
+  const checkIsCartEmpty = () => {
+    if (items.length === 0) {
+      return true;
+    }
+    return false;
+  };
 
   const handlePaymentClick = () => {
     router.push('/transaction');
@@ -329,7 +338,20 @@ export default function CartPage() {
             size="lg"
             w="full"
             display={{ sm: 'none', md: 'none', lg: 'block' }}
-            onClick={handlePaymentClick}
+            onClick={() => {
+              if (checkIsCartEmpty()) {
+                toast({
+                  title: 'Cart is empty',
+                  description:
+                    'Please add items to your cart before proceeding to payment.',
+                  status: 'error',
+                  duration: 5000,
+                  isClosable: true,
+                });
+              } else {
+                handlePaymentClick();
+              }
+            }}
           >
             Lanjut ke Pembayaran
           </Button>

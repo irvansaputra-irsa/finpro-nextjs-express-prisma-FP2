@@ -84,4 +84,20 @@ export class CartController {
       throw error;
     }
   };
+
+  public checkStock = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { cartId } = req.body;
+      const isStockSufficient = await this.cartController.checkStock(cartId);
+      res.status(200).json({ isStockSufficient });
+    } catch (error) {
+      res.status(400).json({
+        message: error.message,
+      });
+    }
+  };
 }

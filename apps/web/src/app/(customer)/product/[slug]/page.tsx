@@ -17,18 +17,19 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import {
-  useAddProductCartMutation,
-  useCreateCartMutation,
-} from '@/hooks/useCartMutation';
+import { useAddProductCartMutation } from '@/hooks/useCartMutation';
+import { useGetUserCart } from '@/hooks/useCart';
 
 export default function ProductDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const idUser = 24;
-  const { mutateAsync: createCart } = useCreateCartMutation();
+  const idUser = 32;
+  // const { mutateAsync: createCart, data: cartInfo } = useCreateCartMutation();
+  const { data: carts } = useGetUserCart(idUser);
+  const cartId = carts?.data.id;
+  const cartItems: any[] = carts?.data.cartId.CartItem || [];
   const bookName = params.slug || '';
   const [simpleDesc, setSimpleDesc] = useState<boolean>(true);
   const { data } = useProductDetailCustomer(bookName);
@@ -43,6 +44,13 @@ export default function ProductDetailPage({
     }
   }, [bookImage]);
 
+  useEffect(() => {
+    if (cartItems?.length > 0 && bookData) {
+      const item = cartItems.find((el) => bookData?.id === el?.book_id);
+      setTotalQty(item.quantity);
+    }
+  }, [cartItems]);
+
   const handleToggleDesc = () => setSimpleDesc(!simpleDesc);
   const changePreviewImage = (img: string) => {
     setMainImage(img);
@@ -56,19 +64,13 @@ export default function ProductDetailPage({
   };
 
   const { mutate: addToCart } = useAddProductCartMutation();
-  const handleAddCart = async () => {
-    try {
-      await createCart(idUser);
-      addToCart({
-        userId: idUser,
-        bookId: bookData.id,
-        quantity: totalQty,
-      });
-    } catch (error) {}
+  const handleAddCart = () => {
+    addToCart({
+      userId: idUser,
+      bookId: bookData.id,
+      quantity: totalQty,
+    });
   };
-
-  // handleAddCart
-
   return (
     <Box
       maxW={'1440px'}

@@ -12,7 +12,7 @@ export class CartRouter {
   }
 
   private initializeRouter(): void {
-    this.router.post('/get-cart-id', this.cartController.getCartId);
+    this.router.get('/get-cart-id/:userId', this.cartController.getCartId);
     this.router.post('/add-item', this.cartController.addItemController);
     this.router.post('/update-item', this.cartController.updateItemController);
     this.router.post('/check-stock', this.cartController.checkStock);

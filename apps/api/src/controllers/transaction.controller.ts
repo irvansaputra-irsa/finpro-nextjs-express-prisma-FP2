@@ -88,6 +88,20 @@ export class TransactionController {
     }
   };
 
+  public acceptTransactionOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      res
+        .status(200)
+        .json({ message: 'Transaction status updated successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getAdminTransactions = async (
     req: Request,
     res: Response,

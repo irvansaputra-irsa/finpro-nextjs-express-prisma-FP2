@@ -1,14 +1,15 @@
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { TransactionQuery } from '@/queries/transaction.queries';
 import { CreateTransaction } from '@/interfaces/transaction.interfaces';
 import prisma from '@/prisma';
 import { Transaction } from '@prisma/client';
 import { HttpException } from '@/exceptions/http.exception';
+import { MutationService } from './mutation.service';
 
 @Service()
 export class TransactionService {
   constructor(private readonly transactionQuery: TransactionQuery) {}
-
+  mutationService = Container.get(MutationService);
   public createTransactionService = async (
     param: CreateTransaction,
   ): Promise<Transaction> => {
@@ -67,7 +68,7 @@ export class TransactionService {
           id: findOrder.warehouse_id,
         },
       });
-      const orderDetail = findOrder.cart.CartItem;
+      const orderDetails = findOrder?.cart?.CartItem;
       if (
         !findOrder.cart ||
         !findOrder.cart.CartItem ||
@@ -81,13 +82,23 @@ export class TransactionService {
       const transactionPrisma = await prisma.$transaction(async () => {
         try {
           //cek dulu stocknya di selected warehouse, kalo kurang lakuin mutasi stok dari warehouse lain ke selected warehouse (+jurnal plus minus)
-          // await
+          await this.mutationService.verifyStock(
+            orderDetails,
+            selectedWarehouse,
+          );
           //baru kurangin stock di selected warehouse sbg pembelian dan (+jurnal minus)
+          const order = await this.mutationService.orderStock(
+            findOrder.id,
+            orderDetails,
+            selectedWarehouse,
+          );
           //update statusnya ke 'ready
-          // await this.updateTransactionStatus(transactionId, 'ready');
+          await this.updateTransactionStatus(transactionId, 'ready');
+          return order;
         } catch (error) {
           throw error;
         }
+        return transactionPrisma;
       });
     } catch (error) {
       throw error;

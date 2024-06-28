@@ -31,7 +31,7 @@ export const useAddProductCartMutation = () => {
       });
       toast({
         title: 'Success',
-        description: 'You have added one product to cart',
+        description: 'You have updated one product quantity on your cart',
         status: 'success',
         duration: 5000,
         isClosable: true,

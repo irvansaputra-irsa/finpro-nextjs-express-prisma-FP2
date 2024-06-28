@@ -149,7 +149,7 @@ export class MutationService {
         if (!inventory) throw new Error('Product stock is not valid');
         //update current warehouse stock
         const oldQty = inventory.stockQty;
-        const newQty = inventory.stockQty - order.qty;
+        const newQty = inventory.stockQty - order.quantity;
         await this.stockQuery.updateStockAfterTransactionQuery({
           oldQty,
           newQty,
@@ -163,31 +163,35 @@ export class MutationService {
   };
 
   public verifyStock = async (orderDetails, currentWarehouse) => {
-    for (const order of orderDetails) {
-      // check dulu stocknya di warehouse current / tujuan
-      let currentStock = await this.stockQuery.checkProductStockAtWarehouse(
-        currentWarehouse.id,
-        order.book_id,
-      );
-      // kalo gak ada warehouse stock sama sekali alias gak ada rownya, buat 1 row baru isinya 0 qty
-      if (!currentStock) {
-        currentStock = await this.stockQuery.addProductToWarehouseStockQuery({
-          bookId: order.book_id,
-          warehouseId: currentWarehouse.id,
-          qty: 0,
-        });
-      }
-      // kalo stocknya gak cukup, mutasi stocknya dari warehouse lain
-      if (order.qty > currentStock.stockQty) {
-        const remainingStock = order.qty - currentStock.stockQty;
-        this.distributeMutationStock(
+    try {
+      for (const order of orderDetails) {
+        // check dulu stocknya di warehouse current / tujuan
+        let currentStock = await this.stockQuery.checkProductStockAtWarehouse(
           currentWarehouse.id,
           order.book_id,
-          currentWarehouse.lat,
-          currentWarehouse.long,
-          remainingStock,
         );
+        // kalo gak ada warehouse stock sama sekali alias gak ada rownya, buat 1 row baru isinya 0 qty
+        if (!currentStock) {
+          currentStock = await this.stockQuery.addProductToWarehouseStockQuery({
+            bookId: order.book_id,
+            warehouseId: currentWarehouse.id,
+            qty: 0,
+          });
+        }
+        // kalo stocknya gak cukup, mutasi stocknya dari warehouse lain
+        if (order.quantity > currentStock.stockQty) {
+          const remainingStock = order.quantity - currentStock.stockQty;
+          this.distributeMutationStock(
+            currentWarehouse.id,
+            order.book_id,
+            currentWarehouse.lat,
+            currentWarehouse.long,
+            remainingStock,
+          );
+        }
       }
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -204,10 +208,10 @@ export class MutationService {
         await this.stockQuery.checkWarehouseStockByWarehouse(warehouseId);
       // ini kondisi kalo stock di warehouse yg di CO, ada kurang quanitity-nya
       const listWarehouse = await this.findNearestWarehouseService(
-        warehouseId,
-        bookId,
         lat,
         long,
+        warehouseId,
+        bookId,
       ); // sudah di sort by nearest
 
       //re-check remaining quantity dr warehouse lain cukup atau gak
@@ -315,24 +319,28 @@ export class MutationService {
   };
 
   public haversineFormula = ([lat1, lon1], [lat2, lon2]) => {
-    const toRadian = (angle) => (Math.PI / 180) * angle;
-    const distance = (a, b) => (Math.PI / 180) * (a - b);
-    const RADIUS_OF_EARTH_IN_KM = 6371;
+    try {
+      const toRadian = (angle) => (Math.PI / 180) * angle;
+      const distance = (a, b) => (Math.PI / 180) * (a - b);
+      const RADIUS_OF_EARTH_IN_KM = 6371;
 
-    const dLat = distance(lat2, lat1);
-    const dLon = distance(lon2, lon1);
+      const dLat = distance(lat2, lat1);
+      const dLon = distance(lon2, lon1);
 
-    lat1 = toRadian(lat1);
-    lat2 = toRadian(lat2);
+      lat1 = toRadian(lat1);
+      lat2 = toRadian(lat2);
 
-    // Haversine Formula
-    const a =
-      Math.pow(Math.sin(dLat / 2), 2) +
-      Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
-    const c = 2 * Math.asin(Math.sqrt(a));
+      // Haversine Formula
+      const a =
+        Math.pow(Math.sin(dLat / 2), 2) +
+        Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
+      const c = 2 * Math.asin(Math.sqrt(a));
 
-    let finalDistance = RADIUS_OF_EARTH_IN_KM * c;
+      let finalDistance = RADIUS_OF_EARTH_IN_KM * c;
 
-    return finalDistance;
+      return finalDistance;
+    } catch (error) {
+      throw error;
+    }
   };
 }

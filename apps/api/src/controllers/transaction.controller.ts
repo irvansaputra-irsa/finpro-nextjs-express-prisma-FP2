@@ -94,9 +94,12 @@ export class TransactionController {
     next: NextFunction,
   ): Promise<void> => {
     try {
+      const { transactionId } = req.body;
+      const order =
+        await this.transactionService.acceptTransactionOrder(transactionId);
       res
         .status(200)
-        .json({ message: 'Transaction status updated successfully' });
+        .json({ message: 'Transaction status updated successfully', order });
     } catch (error) {
       next(error);
     }

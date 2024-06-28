@@ -47,9 +47,9 @@ export default function ProductDetailPage({
   useEffect(() => {
     if (cartItems?.length > 0 && bookData) {
       const item = cartItems.find((el) => bookData?.id === el?.book_id);
-      setTotalQty(item.quantity);
+      if (item) setTotalQty(item?.quantity);
     }
-  }, [cartItems]);
+  }, [cartItems, bookData]);
 
   const handleToggleDesc = () => setSimpleDesc(!simpleDesc);
   const changePreviewImage = (img: string) => {

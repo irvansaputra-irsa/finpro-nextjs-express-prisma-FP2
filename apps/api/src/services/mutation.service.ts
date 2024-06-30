@@ -140,6 +140,7 @@ export class MutationService {
   };
 
   public orderStock = async (transactionId, orderDetails, currentWarehouse) => {
+    console.log('test order stock');
     try {
       for (const order of orderDetails) {
         const inventory = await this.stockQuery.checkProductStockAtWarehouse(
@@ -164,9 +165,10 @@ export class MutationService {
 
   public verifyStock = async (orderDetails, currentWarehouse) => {
     try {
+      let currentStock;
       for (const order of orderDetails) {
         // check dulu stocknya di warehouse current / tujuan
-        let currentStock = await this.stockQuery.checkProductStockAtWarehouse(
+        currentStock = await this.stockQuery.checkProductStockAtWarehouse(
           currentWarehouse.id,
           order.book_id,
         );
@@ -181,7 +183,7 @@ export class MutationService {
         // kalo stocknya gak cukup, mutasi stocknya dari warehouse lain
         if (order.quantity > currentStock.stockQty) {
           const remainingStock = order.quantity - currentStock.stockQty;
-          this.distributeMutationStock(
+          await this.distributeMutationStock(
             currentWarehouse.id,
             order.book_id,
             currentWarehouse.lat,
@@ -190,6 +192,7 @@ export class MutationService {
           );
         }
       }
+      return currentStock;
     } catch (error) {
       throw error;
     }
@@ -203,6 +206,7 @@ export class MutationService {
     remainingStock,
   ) => {
     try {
+      console.log('test distribute stock');
       //re-check
       const currentWarehouse =
         await this.stockQuery.checkWarehouseStockByWarehouse(warehouseId);

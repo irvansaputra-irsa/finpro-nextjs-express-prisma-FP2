@@ -6,9 +6,10 @@ import {
   warehouseStock,
 } from '@/interfaces/stock.interface';
 import prisma from '@/prisma';
-import { Book, Warehouse, WarehouseStock } from '@prisma/client';
+import { Book, CartItem, Warehouse, WarehouseStock } from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { JurnalQuery } from './jurnal.query';
+import { HttpException } from '@/exceptions/http.exception';
 
 @Service()
 export class StockQuery {
@@ -309,6 +310,54 @@ export class StockQuery {
         },
       });
       return deleteProduct;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public returnStockAfterCanceledQuery = async (
+    transactionId: number,
+    cartItem: CartItem[],
+    warehouseId: number,
+  ) => {
+    try {
+      //balikin stock barang di list cart ke warehosue yg tercantum di transaction
+      for (const item of cartItem) {
+        const warehouseStock = await prisma.warehouseStock.findFirst({
+          where: { warehouse_id: warehouseId, book_id: item.book_id },
+          include: {
+            book: true,
+            warehouse: true,
+          },
+        });
+        if (!warehouseStock)
+          throw new HttpException(
+            400,
+            `Warehouse ${warehouseStock.warehouse.warehouse_name} does not have ${warehouseStock.book.book_name} book(s)`,
+          );
+        const oldQty = warehouseStock.stockQty;
+        //update warehouse stock
+        const updatedStock = await prisma.warehouseStock.update({
+          where: {
+            id: warehouseStock.id,
+          },
+          data: {
+            stockQty: oldQty + item.quantity,
+          },
+        });
+
+        //update jurnal
+        await prisma.jurnalStock.create({
+          data: {
+            warehouseStockId: warehouseStock.id,
+            oldStock: oldQty,
+            newStock: updatedStock.stockQty,
+            stockChange: item.quantity,
+            type: 'PLUS',
+            message: `Return stock from order with Transaction ID: ${transactionId}`,
+          },
+        });
+      }
     } catch (error) {
       throw error;
     }

@@ -28,7 +28,18 @@ export class MutationRouter {
       '/canceled',
       this.mutationController.cancelMutationController,
     );
-    this.router.get('/', this.mutationController.getAllMutationController);
+    this.router.get(
+      '/',
+      this.mutationController.getWarehouseMutationController,
+    );
+    this.router.post(
+      '/nearest',
+      this.mutationController.findNearestWarehouseController,
+    );
+    this.router.post(
+      '/distribute',
+      this.mutationController.distributeMutationStockController,
+    );
   }
 
   getRouter(): Router {

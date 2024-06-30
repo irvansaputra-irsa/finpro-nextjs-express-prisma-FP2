@@ -12,12 +12,20 @@ import {
 import React, { MouseEventHandler } from 'react';
 
 export type Dialog = {
-  handleSubmit: MouseEventHandler<HTMLButtonElement>;
+  text: string;
+  handleSubmit: MouseEventHandler;
   isOpen: boolean;
-  onClose: () => void;
+  onClose: any;
+  color?: string;
 };
 
-export default function Dialog({ handleSubmit, isOpen, onClose }: Dialog) {
+export default function Dialog({
+  text,
+  handleSubmit,
+  isOpen,
+  onClose,
+  color = 'green',
+}: Dialog) {
   const cancelRef = React.useRef<HTMLButtonElement>(null);
 
   return (
@@ -29,18 +37,15 @@ export default function Dialog({ handleSubmit, isOpen, onClose }: Dialog) {
       isCentered
     >
       <AlertDialogOverlay />
-
       <AlertDialogContent>
         <AlertDialogHeader>Warning</AlertDialogHeader>
         <AlertDialogCloseButton />
-        <AlertDialogBody>
-          Are you sure you want to add this book to the warehouse?
-        </AlertDialogBody>
+        <AlertDialogBody>{text}</AlertDialogBody>
         <AlertDialogFooter>
           <Button ref={cancelRef} onClick={onClose}>
             No
           </Button>
-          <Button colorScheme="red" ml={3} onClick={handleSubmit}>
+          <Button colorScheme={color} ml={3} onClick={handleSubmit}>
             Yes
           </Button>
         </AlertDialogFooter>

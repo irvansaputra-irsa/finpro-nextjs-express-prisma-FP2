@@ -5,7 +5,7 @@ import { getAliveCart } from '@/interfaces/getAliveCart.interfaces';
 
 @Service()
 export class CartQuery {
-  public getAliveCartQuery = async (param: getAliveCart): Promise<number> => {
+  public getAliveCartQuery = async (param: getAliveCart): Promise<Cart> => {
     try {
       const { userId } = param;
       const data = await prisma.cart.findFirst({
@@ -21,6 +21,9 @@ export class CartQuery {
               ),
           },
         },
+        include: {
+          CartItem: true,
+        },
       });
 
       if (data === null) {
@@ -30,10 +33,10 @@ export class CartQuery {
           },
         });
 
-        return newData.id;
+        return newData;
       }
 
-      return data.id;
+      return data;
     } catch (error) {
       throw error;
     }

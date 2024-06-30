@@ -6,7 +6,7 @@ const parseCurrency = (num: number) => {
 };
 
 const parseDateTime = (date: Date) => {
-  const format = new Date();
+  const format = new Date(date);
   return format.toLocaleString('id-ID', { timeZoneName: 'short' });
 };
 

@@ -88,6 +88,38 @@ export class TransactionController {
     }
   };
 
+  public acceptTransactionOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { transactionId } = req.body;
+      const order =
+        await this.transactionService.acceptTransactionOrder(transactionId);
+      res
+        .status(200)
+        .json({ message: 'Transaction status updated successfully', order });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public cancelTransactionOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { transactionId } = req.body;
+      const order =
+        await this.transactionService.cancelTransactionOrder(transactionId);
+      res.status(200).json({ message: 'Transaction has been canceled', order });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getAdminTransactions = async (
     req: Request,
     res: Response,

@@ -19,7 +19,7 @@ interface Address {
 
 export default function ShowAddressPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const userId = 1;
+  const userId = 32;
   const router = useRouter();
 
   useEffect(() => {

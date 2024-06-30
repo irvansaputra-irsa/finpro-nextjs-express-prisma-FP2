@@ -48,9 +48,11 @@ export class StockController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
+      const user = req.user;
       const data =
         await this.stockService.fetchAllProductAtSelectedWarehouseService(
           Number(id),
+          user,
         );
 
       res.status(200).json({
@@ -74,6 +76,25 @@ export class StockController {
 
       res.status(200).json({
         message: 'Fetch all product success',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteProductStockController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id } = req.params;
+      const data = await this.stockService.deleteProductStockService(
+        Number(id),
+      );
+      res.status(200).json({
+        message: 'Delete product stock at warehouse success',
         data,
       });
     } catch (error) {

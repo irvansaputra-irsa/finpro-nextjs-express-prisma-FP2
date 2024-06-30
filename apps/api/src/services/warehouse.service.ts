@@ -5,14 +5,23 @@ import Container, { Service } from 'typedi';
 @Service()
 export class WarehouseService {
   warehouseQuery = Container.get(WarehouseQuery);
-  public getAllWarehouseService = async (): Promise<Warehouse[]> => {
+  public getAllWarehouseService = async (
+    restricted: boolean,
+    role: string,
+    id: number,
+  ): Promise<Warehouse[]> => {
     try {
-      const data = await this.warehouseQuery.getAllWarehouseQuery();
+      const data = await this.warehouseQuery.getAllWarehouseQuery(
+        restricted,
+        role,
+        id,
+      );
       return data;
     } catch (error) {
       throw error;
     }
   };
+
   public findWarehouseByUserService = async (
     id: number,
   ): Promise<Warehouse> => {
@@ -23,6 +32,7 @@ export class WarehouseService {
       throw error;
     }
   };
+
   public getListWarehouseService = async (id: number, role: string) => {
     try {
       // CHECK BY TOKEN

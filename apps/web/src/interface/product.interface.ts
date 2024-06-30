@@ -28,6 +28,7 @@ export interface product {
   primary_image: string;
   created_at: Date;
   updated_at: Date;
+  current_stock?: number;
   bookCategory?: productCategory;
   BookImage?: productImage[];
 }

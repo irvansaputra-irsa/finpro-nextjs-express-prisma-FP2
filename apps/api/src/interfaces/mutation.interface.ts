@@ -12,3 +12,23 @@ export interface respMutation {
   receiverName: string;
   receiverNotes: string;
 }
+
+export interface getMutation {
+  id: number;
+  pageIncoming: number;
+  pageOutcoming: number;
+  limit: number;
+}
+
+export interface plusStock {
+  warehouseId: number;
+  warehouseName: string;
+  bookId: number;
+  plus: number;
+}
+export interface minusStock {
+  warehouseId: number;
+  warehouseName: string;
+  bookId: number;
+  minus: number;
+}

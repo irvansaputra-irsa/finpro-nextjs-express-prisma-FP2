@@ -29,6 +29,7 @@ export class TransactionRouter {
       '/cancel',
       this.transactionController.cancelTransactionOrder,
     );
+    this.router.post('/send', this.transactionController.sendTransactionOrder);
   }
 
   getRouter(): Router {

@@ -120,6 +120,21 @@ export class TransactionController {
     }
   };
 
+  public sendTransactionOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { transactionId } = req.body;
+      const order =
+        await this.transactionService.sendTransactionOrder(transactionId);
+      res.status(200).json({ message: 'Product has been sent', order });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getAdminTransactions = async (
     req: Request,
     res: Response,

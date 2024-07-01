@@ -112,7 +112,7 @@ export default function CartPage() {
   const [originAddressId, setOriginAddressId] = useState<string>('');
   const [destinationAddressId, setDestinationAddressId] = useState<string>('');
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const userId = 32;
+  const userId = 32; //pake context
   const [radioValue, setRadioValue] = useState<string>('');
 
   useEffect(() => {

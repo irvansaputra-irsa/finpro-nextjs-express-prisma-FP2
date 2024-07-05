@@ -1,5 +1,4 @@
-// TODO: 1. Change userId from hardcode
-// TODO: 2. Change distination address from hardcode with the help of open cage
+// TODO: Change distination address from hardcode with the help of open cage
 
 'use client';
 
@@ -15,9 +14,10 @@ import {
   Button,
   useToast,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/navigation';
+import { AuthContext } from '@/context/Auth';
 
 interface Address {
   street: string;
@@ -50,6 +50,7 @@ interface ShippingOption {
 export default function CartPage() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useContext(AuthContext);
 
   const checkIsCartEmpty = () => {
     if (items.length === 0) {
@@ -112,7 +113,7 @@ export default function CartPage() {
   const [originAddressId, setOriginAddressId] = useState<string>('');
   const [destinationAddressId, setDestinationAddressId] = useState<string>('');
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const userId = 1;
+  const userId = user?.id;
   const [radioValue, setRadioValue] = useState<string>('');
 
   useEffect(() => {

@@ -1,5 +1,3 @@
-// TODO 1: Change userid from hardcode
-
 'use client';
 
 import { Box, Divider, Heading, Text, Button, Flex } from '@chakra-ui/react';

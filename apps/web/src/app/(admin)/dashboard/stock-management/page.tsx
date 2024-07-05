@@ -1,4 +1,5 @@
 'use client';
+import { AuthContext } from '@/context/Auth';
 import { useWarehouse } from '@/hooks/useWarehouse';
 import { warehouse } from '@/interface/warehouse.interface';
 import {
@@ -14,7 +15,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { FaHouseChimney } from 'react-icons/fa6';
 import { IoIosPerson } from 'react-icons/io';
 export default function StockList() {
-  const { data } = useWarehouse();
+  const { data } = useWarehouse(true);
   const warehouseList: warehouse[] = data?.data.data || [];
   const router = useRouter();
   const path = usePathname();

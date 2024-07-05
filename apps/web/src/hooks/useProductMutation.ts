@@ -2,7 +2,7 @@ import { errorResponse } from '@/types/errorResponse';
 import instance from '@/utils/axiosInstance';
 import { useToast } from '@chakra-ui/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 export const useProductMutation = () => {
@@ -32,7 +32,7 @@ export const useProductMutation = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['product'] });
+      queryClient.invalidateQueries({ queryKey: ['product-list'] });
       toast({
         title: 'Success',
         description: 'You have added one product',
@@ -58,7 +58,9 @@ export const useProductDeleteMutation = () => {
         const res = err.response?.data as errorResponse;
         toast({
           title: 'Failed to delete',
-          description: res.message || 'An error occurred while submitting.',
+          description: res.message.includes('constraint')
+            ? 'This book is used, cannot delete it right now'
+            : 'An error occurred while submitting.',
           status: 'error',
           duration: 9000,
           isClosable: true,
@@ -66,7 +68,7 @@ export const useProductDeleteMutation = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['product'] });
+      queryClient.invalidateQueries({ queryKey: ['product-list'] });
       toast({
         title: 'Success',
         description: 'You have deleted one product',

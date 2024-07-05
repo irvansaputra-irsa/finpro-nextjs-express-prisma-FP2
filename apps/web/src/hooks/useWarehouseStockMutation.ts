@@ -26,9 +26,8 @@ export const useAddStockMutation = () => {
       }
     },
     onSuccess: (data) => {
-      const warehouseId = data.data.data.warehouseStock.warehouse.id;
       queryClient.invalidateQueries({
-        queryKey: [`warehouse-stock`, warehouseId],
+        queryKey: [`warehouse-stock`],
       });
       toast({
         title: 'Success',
@@ -73,6 +72,41 @@ export const useAddProductWarehouseMutation = () => {
       toast({
         title: 'Success',
         description: 'Product successfully added to this warehouse',
+        status: 'success',
+        duration: 9000,
+        isClosable: true,
+      });
+    },
+  });
+};
+
+export const useDeleteProductWarehouseMutation = () => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await instance.delete(`/stock/${id}`);
+      return res;
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err)) {
+        const res = err.response?.data as errorResponse;
+        toast({
+          title: 'Failed to delete product at this warehouse',
+          description: res.message || 'An error occurred while submitting.',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ['warehouse-stock'],
+      });
+      toast({
+        title: 'Success',
+        description: 'Product successfully deleted at this warehouse',
         status: 'success',
         duration: 9000,
         isClosable: true,

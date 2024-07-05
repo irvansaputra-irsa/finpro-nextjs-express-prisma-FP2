@@ -1,8 +1,9 @@
 'use client';
 
 import { Box, Divider, Heading, Text, Button, Flex } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AuthContext } from '@/context/Auth';
 
 interface Address {
   id: number;
@@ -17,7 +18,8 @@ interface Address {
 
 export default function ShowAddressPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const userId = 1;
+  const { user } = useContext(AuthContext);
+  const userId = user?.id;
   const router = useRouter();
 
   useEffect(() => {

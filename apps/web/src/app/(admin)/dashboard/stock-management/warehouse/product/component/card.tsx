@@ -10,7 +10,6 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
 import React from 'react';
 
 interface ProductCardProps {
@@ -72,7 +71,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, warehouseId }) => {
           Add book
         </Button>
       </Stack>
-      <Dialog handleSubmit={handleSubmit} isOpen={isOpen} onClose={onClose} />
+      <Dialog
+        text="Are you sure you want to add this book to the warehouse?"
+        handleSubmit={handleSubmit}
+        isOpen={isOpen}
+        onClose={onClose}
+        color="red"
+      />
     </Box>
   );
 };

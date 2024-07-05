@@ -16,8 +16,10 @@ export class CartController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const { userId } = req.body;
-      const cartId = await this.cartController.getAliveCartService({ userId });
+      const { userId } = req.params;
+      const cartId = await this.cartController.getAliveCartService({
+        userId: Number(userId),
+      });
 
       res.status(200).json({ cartId });
     } catch (error) {
@@ -34,16 +36,16 @@ export class CartController {
   ): Promise<void> => {
     try {
       const { userId, bookId, quantity } = req.body as addItemRequest;
-      const cartId = await this.cartController.getAliveCartService({ userId });
+      const cart = await this.cartController.getAliveCartService({ userId });
 
       let cartItemId = await this.cartItemController.checkCartItemExistService({
-        cartId,
+        cartId: cart.id,
         bookId,
       });
 
       if (cartItemId === null) {
         cartItemId = await this.cartItemController.createNewCartItemService({
-          cartId,
+          cartId: cart.id,
           bookId,
         });
       }
@@ -55,6 +57,7 @@ export class CartController {
 
       res.status(201).json({
         message: 'Successfully added book to user cart',
+        cartId: cart.id,
       });
     } catch (error) {
       throw error;

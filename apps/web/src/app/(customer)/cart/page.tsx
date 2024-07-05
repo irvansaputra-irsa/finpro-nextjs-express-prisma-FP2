@@ -153,18 +153,18 @@ export default function CartPage() {
     const fetchCartId = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API_URL}/cart/get-cart-id`,
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}/cart/get-cart-id/${userId}`,
           {
-            method: 'POST',
+            method: 'GET',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userId }),
+            // body: JSON.stringify({ userId }),
           },
         );
         if (response.ok) {
           const data = await response.json();
-          setCartId(data.cartId);
+          setCartId(data.cartId.id);
         } else {
           throw new Error('Failed to fetch cart ID');
         }

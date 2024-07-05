@@ -21,6 +21,15 @@ export class TransactionRouter {
       this.transactionController.updateTransactionStatus,
     );
     this.router.post('/admin', this.transactionController.getAdminTransactions);
+    this.router.post(
+      '/accept',
+      this.transactionController.acceptTransactionOrder,
+    );
+    this.router.post(
+      '/cancel',
+      this.transactionController.cancelTransactionOrder,
+    );
+    this.router.post('/send', this.transactionController.sendTransactionOrder);
   }
 
   getRouter(): Router {

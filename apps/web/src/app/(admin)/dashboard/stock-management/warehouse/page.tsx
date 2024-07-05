@@ -4,26 +4,13 @@ import {
   Box,
   Button,
   Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
   Heading,
-  Icon,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Spinner,
   Table,
   TableCaption,
   TableContainer,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
@@ -31,10 +18,16 @@ import {
 } from '@chakra-ui/react';
 import { FormEvent, useRef, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
-import { useAddStockMutation } from '@/hooks/useWarehouseStockMutation';
+import {
+  useAddStockMutation,
+  useDeleteProductWarehouseMutation,
+} from '@/hooks/useWarehouseStockMutation';
 import { parseCurrency, parseDateTime } from '@/utils/convert';
 import { Link } from '@chakra-ui/next-js';
 import { useSearchParams } from 'next/navigation';
+import { MdDelete } from 'react-icons/md';
+import ModalStock from './component/modalAdd';
+import DialogDelete from './component/dialogDelete';
 export default function WarehouseStock() {
   const param = useSearchParams();
   const warehouseId = param.get('id') || 0;
@@ -43,30 +36,54 @@ export default function WarehouseStock() {
   );
   const productList = listWarehouseStock?.data.data || [];
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpenDialog,
+    onOpen: onOpenDialog,
+    onClose: onCloseDialog,
+  } = useDisclosure();
   const [currentIdModal, setCurrentIdModal] = useState<number>(0);
-  const [input, setInput] = useState<number>(0);
   const { mutate: mutateAddStock } = useAddStockMutation();
-  const initialRef = useRef(null);
+  const { mutate: deleteStock } = useDeleteProductWarehouseMutation();
+  const initialRef = useRef<HTMLInputElement>(null);
   const openModal = (id: number) => {
     setCurrentIdModal(id);
     onOpen();
   };
 
+  const openDialog = (id: number) => {
+    setCurrentIdModal(id);
+    onOpenDialog();
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    mutateAddStock({ id: currentIdModal, stockAddition: input });
+    mutateAddStock({
+      id: currentIdModal,
+      stockAddition: initialRef.current?.value
+        ? Number(initialRef.current.value)
+        : 0,
+    });
     onClose();
   };
+
   if (!isLoading) {
     return (
-      <Box w={{ base: '100%', xl: '60%' }}>
-        <Flex justifyContent={'space-between'}>
-          <Heading p={5}>Book stock at warehouse</Heading>
+      <Box
+        bg={'#FDFFE2'}
+        p={20}
+        borderRadius={20}
+        mx="auto"
+        w={{ base: '100%', xl: '75%' }}
+      >
+        <Flex justifyContent={'space-between'} py={12}>
+          <Heading size={'2xl'}>Book stock at warehouse</Heading>
           <Link
             alignSelf={'center'}
             href={`/dashboard/stock-management/warehouse/product?id=${warehouseId}`}
           >
-            <Button colorScheme="orange">Add product</Button>
+            <Button colorScheme="orange" w={'200px'}>
+              Add product
+            </Button>
           </Link>
         </Flex>
         <TableContainer mt={5}>
@@ -79,7 +96,7 @@ export default function WarehouseStock() {
                 <Th isNumeric>Price</Th>
                 <Th>Stock Quantity</Th>
                 <Th>Last updated</Th>
-                <Th>Action</Th>
+                <Th textAlign={'center'}>Action</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -92,14 +109,22 @@ export default function WarehouseStock() {
                     <Td>{el?.stockQty}</Td>
                     <Td>{parseDateTime(el?.updated_at)}</Td>
                     <Td>
-                      <Icon
-                        as={FaPlus}
-                        cursor={'pointer'}
-                        w={7}
-                        onClick={() => {
-                          openModal(el.id);
-                        }}
-                      />
+                      <Flex gap={5}>
+                        <FaPlus
+                          cursor={'pointer'}
+                          onClick={() => {
+                            openModal(el.id);
+                          }}
+                          size={23}
+                        />
+                        <MdDelete
+                          cursor={'pointer'}
+                          size={25}
+                          onClick={() => {
+                            deleteStock(el.id);
+                          }}
+                        />
+                      </Flex>
                     </Td>
                   </Tr>
                 ))
@@ -113,46 +138,18 @@ export default function WarehouseStock() {
             </Tbody>
           </Table>
         </TableContainer>
-
-        <Modal isOpen={isOpen} onClose={onClose} initialFocusRef={initialRef}>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Add stock</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <FormControl>
-                  <FormLabel>Quantity</FormLabel>
-                  <Input
-                    type="number"
-                    min={1}
-                    name="stockAdd"
-                    id="stockAdd"
-                    onChange={(e) => setInput(Number(e.target.value))}
-                    ref={initialRef}
-                  />
-                  <FormHelperText color={'black.600'}>
-                    Please input it correctly.
-                  </FormHelperText>
-                </FormControl>
-              </ModalBody>
-
-              <ModalFooter>
-                <Button
-                  variant={'ghost'}
-                  colorScheme="white"
-                  mr={3}
-                  onClick={onClose}
-                >
-                  Close
-                </Button>
-                <Button type="submit" colorScheme="orange">
-                  Submit
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </form>
-        </Modal>
+        <ModalStock
+          isOpen={isOpen}
+          onClose={onClose}
+          initialRef={initialRef}
+          handleSubmit={handleSubmit}
+          isDelete={false}
+        />
+        <DialogDelete
+          isOpenDialog={isOpenDialog}
+          onCloseDialog={onCloseDialog}
+          currentIdModal={currentIdModal}
+        />
       </Box>
     );
   } else return <Spinner />;

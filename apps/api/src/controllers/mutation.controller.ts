@@ -71,16 +71,72 @@ export class MutationController {
       next(error);
     }
   };
-  public getAllMutationController = async (
+  public getWarehouseMutationController = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const data = await this.mutationService.getAllMutationService();
+      const { id, pageIncoming, pageOutcoming, limit } = req.query;
+
+      const ids = id ?? 0;
+      const pageIncomings = pageIncoming ?? 0;
+      const pageOutcomings = pageOutcoming ?? 0;
+      const limits = limit ?? 5;
+      const data = await this.mutationService.getWarehouseMutationService({
+        id: Number(ids),
+        pageIncoming: Number(pageIncomings),
+        pageOutcoming: Number(pageOutcomings),
+        limit: Number(limits),
+      });
+
       res.status(200).json({
         message: 'Get all mutation success',
         data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public findNearestWarehouseController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { warehouseId, bookId, lat, long } = req.body;
+      const data = await this.mutationService.findNearestWarehouseService(
+        lat,
+        long,
+        warehouseId,
+        bookId,
+      );
+      res.status(200).json({
+        message: 'Get all mutation success',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public distributeMutationStockController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { warehouseId, bookId, lat, long, remainingStock } = req.body;
+      const data = await this.mutationService.distributeMutationStock(
+        warehouseId,
+        bookId,
+        lat,
+        long,
+        remainingStock,
+      );
+      res.status(200).json({
+        message: 'Distribute mutation success',
       });
     } catch (error) {
       next(error);

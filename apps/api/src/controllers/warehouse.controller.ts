@@ -10,7 +10,13 @@ export class WarehouseController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const data = await this.warehouseService.getAllWarehouseService();
+      const { restricted } = req.query;
+      const { role, id } = req.user;
+      const data = await this.warehouseService.getAllWarehouseService(
+        Boolean(restricted),
+        role,
+        id,
+      );
       res.status(200).json({
         message: 'Get all warehouse list success',
         data,

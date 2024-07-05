@@ -170,4 +170,20 @@ export class ProductController {
       next(error);
     }
   };
+
+  public getListProductNameController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const data = await this.productService.getListProductNameService();
+      res.status(200).json({
+        message: 'Get all products name success',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

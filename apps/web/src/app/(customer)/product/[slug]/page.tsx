@@ -16,18 +16,20 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useAddProductCartMutation } from '@/hooks/useCartMutation';
 import { useGetUserCart } from '@/hooks/useCart';
+import { AuthContext } from '@/context/Auth';
+import { useRouter } from 'next/navigation';
 
 export default function ProductDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const idUser = 32;
-  // const { mutateAsync: createCart, data: cartInfo } = useCreateCartMutation();
-  const { data: carts } = useGetUserCart(idUser);
+  const router = useRouter();
+  const { user } = useContext(AuthContext);
+  const { data: carts } = useGetUserCart(user?.id || 0);
   const cartId = carts?.data.id;
   const cartItems: any[] = carts?.data.cartId.CartItem || [];
   const bookName = params.slug || '';
@@ -65,11 +67,13 @@ export default function ProductDetailPage({
 
   const { mutate: addToCart } = useAddProductCartMutation();
   const handleAddCart = () => {
-    addToCart({
-      userId: idUser,
-      bookId: bookData.id,
-      quantity: totalQty,
-    });
+    if (user?.id) {
+      addToCart({
+        userId: user?.id,
+        bookId: bookData.id,
+        quantity: totalQty,
+      });
+    } else router.push('/login');
   };
   return (
     <Box

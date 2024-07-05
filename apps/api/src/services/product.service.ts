@@ -110,4 +110,13 @@ export class ProductService {
       throw error;
     }
   };
+
+  public getListProductNameService = async () => {
+    try {
+      const listProduct = await this.productQuery.getListProductNameQuery();
+      return listProduct;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

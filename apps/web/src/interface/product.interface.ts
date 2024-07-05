@@ -32,3 +32,8 @@ export interface product {
   bookCategory?: productCategory;
   BookImage?: productImage[];
 }
+
+export interface productNameList {
+  id: number;
+  book_name: string;
+}

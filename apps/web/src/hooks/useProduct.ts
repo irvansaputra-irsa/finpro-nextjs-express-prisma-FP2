@@ -94,3 +94,13 @@ export const useProductDetailCustomer = (bookName: string) => {
     },
   });
 };
+
+export const useProductsName = () => {
+  return useQuery({
+    queryKey: ['product-list-name'],
+    queryFn: async () => {
+      const res = await instance.get('product/lists');
+      return res;
+    },
+  });
+};

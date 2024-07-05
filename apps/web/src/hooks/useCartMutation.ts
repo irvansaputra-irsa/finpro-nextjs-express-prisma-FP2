@@ -21,8 +21,10 @@ export const useAddProductCartMutation = () => {
   const toast = useToast();
   return useMutation({
     mutationFn: async (payload: addCart) => {
-      const res = await instance.post(`cart/add-item`, payload);
-      return res;
+      if (payload?.userId) {
+        const res = await instance.post(`cart/add-item`, payload);
+        return res;
+      }
     },
     onSuccess: (data) => {
       const id = data?.data?.cartId || 0;

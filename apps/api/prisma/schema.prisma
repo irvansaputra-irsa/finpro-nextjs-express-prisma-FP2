@@ -67,7 +67,7 @@ model Cart {
 }
 
 model Transaction {
-  id                Int      @id @default(autoincrement())
+  id                Int       @id @default(autoincrement())
   status            String
   payment_method    String
   payment_proof     String

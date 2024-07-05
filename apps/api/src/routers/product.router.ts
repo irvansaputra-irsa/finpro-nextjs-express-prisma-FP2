@@ -23,6 +23,10 @@ export class ProductRouter {
       this.productController.createProductController,
     );
     this.router.get(
+      '/lists',
+      this.productController.getListProductNameController,
+    );
+    this.router.get(
       '/dashboard',
       this.productController.getAllProductsDashboardController,
     );

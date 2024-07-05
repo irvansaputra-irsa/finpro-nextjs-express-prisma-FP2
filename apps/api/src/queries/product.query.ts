@@ -424,4 +424,18 @@ export class ProductQuery {
       throw error;
     }
   };
+
+  public getListProductNameQuery = async () => {
+    try {
+      const listProduct = await prisma.book.findMany({
+        select: {
+          id: true,
+          book_name: true,
+        },
+      });
+      return listProduct;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

@@ -8,5 +8,6 @@ export const useGetUserCart = (id: number) => {
       const res = await instance.get(`/cart/get-cart-id/${id}`);
       return res;
     },
+    enabled: !!id,
   });
 };

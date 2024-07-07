@@ -20,8 +20,10 @@ import {
   Th,
   Td,
   Image,
+  Flex,
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '@/context/Auth';
 
 interface Transaction {
   id: number;
@@ -39,6 +41,7 @@ const AdminTransactionPage = () => {
   const [totalTransactions, setTotalTransactions] = useState(0);
   const [searchDate, setSearchDate] = useState('');
   const toast = useToast();
+  const { user } = useContext(AuthContext);
   const [userRole, setUserRole] = useState('super admin');
 
   useEffect(() => {
@@ -50,8 +53,8 @@ const AdminTransactionPage = () => {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_API_URL}/transaction/admin`,
         {
-          userId: 3,
-          role: userRole,
+          userId: user?.id,
+          role: user?.role,
           searchDate,
         },
       );
@@ -136,7 +139,7 @@ const AdminTransactionPage = () => {
               <Th>Created Date</Th>
               <Th>Final Price</Th>
               <Th>Payment Proof</Th>
-              <Th>Action</Th>
+              <Th>Proof Action</Th>
               <Th>Ship Item</Th>
               <Th>Cancel Shipping</Th>
             </Tr>
@@ -157,30 +160,34 @@ const AdminTransactionPage = () => {
                   />
                 </Td>
                 <Td>
-                  <Button
-                    colorScheme="green"
-                    onClick={() => {
-                      handleUpdateStatus(transaction.id, 'on process');
-                      /**
-                       * Disini, setelah status berubah menjadi on process,
-                       * pastikan kesiapan barang, mutasi, dkk.
-                       */
-                      handleUpdateStatus(transaction.id, 'ready');
-                    }}
-                    isDisabled={transaction.status !== 'waiting approval'}
-                    mr="2"
-                  >
-                    Accept
-                  </Button>
-                  <Button
-                    colorScheme="red"
-                    onClick={() =>
-                      handleUpdateStatus(transaction.id, 'payment rejected')
-                    }
-                    isDisabled={transaction.status !== 'waiting approval'}
-                  >
-                    Reject
-                  </Button>
+                  <Flex>
+                    <Button
+                      colorScheme="green"
+                      size="sm"
+                      onClick={() => {
+                        handleUpdateStatus(transaction.id, 'on process');
+                        /**
+                         * Disini, setelah status berubah menjadi on process,
+                         * pastikan kesiapan barang, mutasi, dkk.
+                         */
+                        handleUpdateStatus(transaction.id, 'ready');
+                      }}
+                      isDisabled={transaction.status !== 'waiting approval'}
+                      mr="2"
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      colorScheme="red"
+                      size="sm"
+                      onClick={() =>
+                        handleUpdateStatus(transaction.id, 'payment rejected')
+                      }
+                      isDisabled={transaction.status !== 'waiting approval'}
+                    >
+                      Reject
+                    </Button>
+                  </Flex>
                 </Td>
                 <Td>
                   <Button

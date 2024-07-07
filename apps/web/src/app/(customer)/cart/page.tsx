@@ -84,6 +84,8 @@ export default function CartPage() {
   const toast = useToast();
   const { user } = useContext(AuthContext);
 
+  console.log('USER: ', user);
+
   const checkIsCartEmpty = () => {
     if (items.length === 0) {
       return true;
@@ -145,7 +147,7 @@ export default function CartPage() {
   const [originAddressId, setOriginAddressId] = useState<string>('');
   const [destinationAddressId, setDestinationAddressId] = useState<string>('');
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const userId = 1; //useState<number>(user!.id);
+  const userId = user?.id; //useState<number>(user!.id);
   const [radioValue, setRadioValue] = useState<string>('');
 
   useEffect(() => {
@@ -154,6 +156,7 @@ export default function CartPage() {
       setAddress(JSON.parse(storedAddress));
     } else {
       const fetchDefaultAddress = async () => {
+        console.log(userId);
         try {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_BASE_API_URL}/address/default`,

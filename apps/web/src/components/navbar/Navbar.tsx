@@ -41,6 +41,11 @@ export default function Navbar() {
     } else {
       return (
         <>
+          <Link href="/cart">
+            <Button w="full" variant="ghost">
+              Cart
+            </Button>
+          </Link>
           <Link href="/login" onClick={() => useLogout()}>
             <Button w="full" variant="ghost">
               Log out

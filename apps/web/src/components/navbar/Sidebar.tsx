@@ -133,7 +133,10 @@ const SidebarContent = (props: BoxProps) => {
             </NavItem>
           </Link>
         </Collapse>
-        <NavItem icon={GrTransaction}>Order</NavItem>
+        <Link href={'/dashboard/admin-transaction'}>
+          <NavItem icon={GrTransaction}>Order</NavItem>
+        </Link>
+
         <NavItem icon={MdInventory} onClick={integrationsInventory.onToggle}>
           Inventory
           <Icon

@@ -22,6 +22,8 @@ export class AddressController {
       const postal_code = address === null ? '-' : address.postal_code;
       const city = address === null ? '-' : address.city;
       const country = address === null ? '-' : address.country;
+      const lat = address === null ? 0 : address.lat;
+      const long = address === null ? 0 : address.long;
 
       res.status(200).json({
         id,
@@ -29,6 +31,8 @@ export class AddressController {
         postal_code,
         city,
         country,
+        lat,
+        long,
       });
     } catch (error) {
       throw error;

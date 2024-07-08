@@ -24,6 +24,8 @@ interface Address {
   postal_code: string;
   city: string;
   country: string;
+  lat: string;
+  long: string;
 }
 
 interface Item {
@@ -47,10 +49,42 @@ interface ShippingOption {
   }[];
 }
 
+const fetchNearestWarehouse = async (lat: string, long: string) => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}/mutation/nearest`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          warehouseId: null,
+          bookId: null,
+          lat: lat,
+          long: long,
+        }),
+      },
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      throw new Error('Failed to fetch nearest warehouse');
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
 export default function CartPage() {
   const router = useRouter();
   const toast = useToast();
   const { user } = useContext(AuthContext);
+
+  console.log('USER:', user);
 
   const checkIsCartEmpty = () => {
     if (items.length === 0) {
@@ -113,7 +147,7 @@ export default function CartPage() {
   const [originAddressId, setOriginAddressId] = useState<string>('');
   const [destinationAddressId, setDestinationAddressId] = useState<string>('');
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const userId = user?.id;
+  const userId = user?.id; //useState<number>(user!.id);
   const [radioValue, setRadioValue] = useState<string>('');
 
   useEffect(() => {
@@ -122,6 +156,7 @@ export default function CartPage() {
       setAddress(JSON.parse(storedAddress));
     } else {
       const fetchDefaultAddress = async () => {
+        console.log(userId);
         try {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_BASE_API_URL}/address/default`,
@@ -251,8 +286,39 @@ export default function CartPage() {
 
   // Buat yang sama dengan destination address
   useEffect(() => {
-    setDestinationAddressId('151');
-  }, []);
+    const getDestinationCityId = async () => {
+      try {
+        let nearestWareHouseCity;
+        if (address) {
+          const data = await fetchNearestWarehouse(address.lat, address.long);
+          nearestWareHouseCity = data.data[0].city;
+          console.log('Nearest WH CName:', nearestWareHouseCity);
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}/raja-ongkir/city-id`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ cityName: nearestWareHouseCity }),
+          },
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log('ini warehouse id yang diterima:', data);
+          setDestinationAddressId(data.cityId);
+        } else {
+          throw new Error('Failed to fetch cart ID');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getDestinationCityId();
+  }, [address]);
 
   useEffect(() => {
     const calculateShippingCost = async () => {

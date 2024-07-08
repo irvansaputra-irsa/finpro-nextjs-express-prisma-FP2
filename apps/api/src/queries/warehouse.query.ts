@@ -97,9 +97,4 @@ export class WarehouseQuery {
       throw error;
     }
   };
-
-  public findWarehouseById = async () => {
-    try {
-    } catch (error) {}
-  };
 }

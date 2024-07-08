@@ -2,6 +2,7 @@ import { jurnal, mutationJurnal } from '@/interfaces/jurnal.interfaces';
 import {
   WarehouseStockWithWarehouse,
   addStock,
+  removeStock,
   updateStockMutation,
   warehouseStock,
 } from '@/interfaces/stock.interface';
@@ -107,7 +108,65 @@ export class StockQuery {
               newStock: warehouseStockProduct.stockQty,
               stockChange: stockAddition,
               type: 'PLUS',
-              message: `Buku ${isProductAtWarehouse.book.book_name} telah ditambahkan ke warehouse ${isProductAtWarehouse.warehouse.warehouse_name} sebanyak ${stockAddition} buah`,
+              message: `${stockAddition} ${isProductAtWarehouse.book.book_name} book(s) successfully added to warehouse ${isProductAtWarehouse.warehouse.warehouse_name}`,
+            },
+            include: {
+              warehouseStock: {
+                include: {
+                  warehouse: true,
+                },
+              },
+            },
+          });
+          return jurnal;
+        } catch (error) {
+          throw error;
+        }
+      });
+      return transactions;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public removeStockQuery = async (param: removeStock) => {
+    try {
+      const transactions = await prisma.$transaction(async () => {
+        try {
+          const { id, stockSubtraction } = param;
+          //1. find productnya udah ada di warehouse atau blm sebelum ditambahkan
+          const isProductAtWarehouse = await prisma.warehouseStock.findFirst({
+            where: {
+              id,
+            },
+            include: {
+              book: true,
+              warehouse: true,
+            },
+          });
+          if (!isProductAtWarehouse) throw new Error('Product is not valid');
+          //2. masukin tambahan stocknya ke table warehouse stock
+          const warehouseStockProduct = await prisma.warehouseStock.update({
+            data: {
+              stockQty: isProductAtWarehouse.stockQty - stockSubtraction,
+            },
+            include: {
+              warehouse: true,
+              book: true,
+            },
+            where: {
+              id,
+            },
+          });
+          //3. update jurnal penambahannya
+          const jurnal = await prisma.jurnalStock.create({
+            data: {
+              warehouseStockId: warehouseStockProduct.id,
+              oldStock: isProductAtWarehouse.stockQty,
+              newStock: warehouseStockProduct.stockQty,
+              stockChange: stockSubtraction,
+              type: 'MINUS',
+              message: `${stockSubtraction} ${isProductAtWarehouse.book.book_name} book(s) successfully removed from warehouse ${isProductAtWarehouse.warehouse.warehouse_name}`,
             },
             include: {
               warehouseStock: {
@@ -302,13 +361,30 @@ export class StockQuery {
     try {
       const check = await prisma.warehouseStock.findFirst({
         where: { id },
+        include: {
+          warehouse: true,
+          book: true,
+        },
       });
+      const oldStock = check?.stockQty;
       if (!check) throw new Error('Product is not exist anymore');
       const deleteProduct = await prisma.warehouseStock.delete({
         where: {
           id,
         },
       });
+
+      //catat jurnal minus kalo ke delete
+      // await prisma.jurnalStock.create({
+      //   data: {
+      //     type: 'MINUS',
+      //     warehouseStockId: check.id,
+      //     oldStock,
+      //     newStock: 0,
+      //     stockChange: oldStock,
+      //     message: `${check.book.book_name} books has been deleted in warehouse ${check.warehouse.warehouse_name}`,
+      //   },
+      // });
       return deleteProduct;
     } catch (error) {
       throw error;

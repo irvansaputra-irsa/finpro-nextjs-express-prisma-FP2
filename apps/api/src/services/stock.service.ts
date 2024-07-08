@@ -1,6 +1,10 @@
 import { HttpException } from '@/exceptions/http.exception';
 import { jurnal } from '@/interfaces/jurnal.interfaces';
-import { warehouseStock, addStock } from '@/interfaces/stock.interface';
+import {
+  warehouseStock,
+  addStock,
+  removeStock,
+} from '@/interfaces/stock.interface';
 import { ProductQuery } from '@/queries/product.query';
 import { StockQuery } from '@/queries/stock.query';
 import { WarehouseQuery } from '@/queries/warehouse.query';
@@ -39,6 +43,20 @@ export class StockService {
       // kalau super admin juga lanjut
       // 2. baru insert qtynya sesuai warehouse id dan product id
       const data = await this.stockQuery.addStockQuery(param);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public removeStockService = async (param: removeStock): Promise<jurnal> => {
+    try {
+      // 1. cek yang masukin datanya WAREHOUSE admin di WAREHOUSE tersebut atau buakn
+      // kalau bukan ya throw error
+      // kalau iya lanjut
+      // kalau super admin juga lanjut
+      // 2. baru insert qtynya sesuai warehouse id dan product id
+      const data = await this.stockQuery.removeStockQuery(param);
       return data;
     } catch (error) {
       throw error;

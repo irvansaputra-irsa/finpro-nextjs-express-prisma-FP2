@@ -3,4 +3,5 @@ export interface nearestWarehouse {
   warehouseName: string;
   distance: number;
   stockAvailable: number;
+  city: string;
 }

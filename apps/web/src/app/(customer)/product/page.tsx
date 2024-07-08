@@ -238,13 +238,13 @@ export default function ProductListPage() {
               </Stack>
             </GridItem>
           </Grid>
+          <Paginate
+            isPlaceholderData={isPlaceholderData}
+            page={page}
+            totalPages={res?.totalPages}
+            handleClickButton={handleClickButton}
+          />
         </Box>
-        <Paginate
-          isPlaceholderData={isPlaceholderData}
-          page={page}
-          totalPages={res?.totalPages}
-          handleClickButton={handleClickButton}
-        />
       </Stack>
     </Box>
   );

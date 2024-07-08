@@ -1,5 +1,7 @@
 import prisma from '@/prisma';
 import { User } from '@/types/express';
+import { deleteHypeninString } from '@/utils/convert.utils';
+import { dateBetween } from '@/utils/rangeDate.utils';
 import { Service } from 'typedi';
 
 @Service()
@@ -7,7 +9,7 @@ export class ReportQuery {
   public sumSalesRevenuePerMonth = async (
     byCategory: string | null,
     byProduct: string | null,
-    byWarehouse: number | null,
+    byWarehouse: string | null,
     user: User,
   ) => {
     try {
@@ -15,14 +17,14 @@ export class ReportQuery {
         //filter by category
         book: {
           bookCategory: {
-            book_category_name: byCategory,
+            book_category_name: deleteHypeninString(byCategory),
           },
         },
       };
       const filterProduct = {
         //filter by product
         book: {
-          book_name: byProduct,
+          book_name: deleteHypeninString(byProduct),
         },
       };
       //authorization checking and filter by warehouse
@@ -30,7 +32,12 @@ export class ReportQuery {
       let queryWarehouseId: number = 0;
       if (roles === 'super admin') {
         if (byWarehouse) {
-          queryWarehouseId = byWarehouse;
+          const warehouse = await prisma.warehouse.findFirstOrThrow({
+            where: {
+              warehouse_name: deleteHypeninString(byWarehouse),
+            },
+          });
+          queryWarehouseId = warehouse.id;
         }
       } else {
         const findWarehouse = await prisma.warehouse.findFirst({
@@ -41,27 +48,7 @@ export class ReportQuery {
         queryWarehouseId = findWarehouse.id;
       }
 
-      const dateBetween = {
-        january: {
-          gte: new Date('2024-01-01'),
-          lte: new Date('2024-01-31'),
-        },
-        february: {
-          gte: new Date('2024-02-01'),
-          lte: new Date('2024-02-11'),
-        },
-        march: {
-          gte: new Date('2024-03-01'),
-          lte: new Date('2024-03-31'),
-        },
-        april: { gte: new Date('2024-04-01'), lte: new Date('2024-04-30') },
-        may: { gte: new Date('2024-05-01'), lte: new Date('2024-05-31') },
-        june: {
-          gte: new Date('2024-06-01'),
-          lte: new Date('2024-06-30'),
-        },
-      };
-
+      const date = dateBetween;
       const sumRevenueByMonth = async (month: string) => {
         const cartItemMonthSales = await prisma.cartItem.aggregate({
           _sum: {
@@ -73,19 +60,12 @@ export class ReportQuery {
               {
                 cart: {
                   Transaction: {
-                    created_at: dateBetween[month],
+                    created_at: date[month],
                   },
                 },
               },
               {
                 OR: [
-                  {
-                    cart: {
-                      Transaction: {
-                        status: 'ready',
-                      },
-                    },
-                  },
                   {
                     cart: {
                       Transaction: {
@@ -120,6 +100,7 @@ export class ReportQuery {
         aprilRevenue,
         mayRevenue,
         juneRevenue,
+        julyRevenue,
       ] = await Promise.all([
         sumRevenueByMonth('january'),
         sumRevenueByMonth('february'),
@@ -127,6 +108,7 @@ export class ReportQuery {
         sumRevenueByMonth('april'),
         sumRevenueByMonth('may'),
         sumRevenueByMonth('june'),
+        sumRevenueByMonth('july'),
       ]);
 
       return {
@@ -154,39 +136,186 @@ export class ReportQuery {
           revenue: juneRevenue._sum.total_price ?? 0,
           sold: juneRevenue._sum.quantity ?? 0,
         },
+        julyRevenue: {
+          revenue: julyRevenue._sum.total_price ?? 0,
+          sold: julyRevenue._sum.quantity ?? 0,
+        },
       };
     } catch (error) {
       throw error;
     }
   };
 
-  public topSellingProduct = async () => {
+  public topSellingProduct = async (
+    user: User,
+    queryWarehouse: string | null,
+  ) => {
     try {
-      const topSalesProduct =
-        await prisma.$queryRaw`SELECT b.*, SUM(c.quantity) AS sold FROM cartItem c JOIN  book b on c.book_id = b.id JOIN cart ca on ca.id = c.cart_id JOIN transaction t on t.cart_id = ca.id WHERE t.status = 'ready' OR t.status = 'completed' OR t.status = 'on delivery' GROUP BY c.book_id ORDER BY Sold DESC LIMIT 5;`;
+      let filter = '';
+      if (user.role === 'super admin') {
+        if (queryWarehouse) {
+          const warehouse = await prisma.warehouse.findFirstOrThrow({
+            where: {
+              warehouse_name: deleteHypeninString(queryWarehouse),
+            },
+          });
+          const warehouseId = warehouse.id;
+          filter += `AND t.warehouse_id = ${warehouseId}`;
+        }
+      } else {
+        const warehouseAdmin = await prisma.warehouse.findFirstOrThrow({
+          where: {
+            warehouse_admin_id: user?.id,
+          },
+        });
+        const warehouseId = warehouseAdmin.id;
+        filter += `AND t.warehouse_id = ${warehouseId}`;
+      }
+
+      const topSalesProduct = await prisma.$queryRawUnsafe(
+        `SELECT b.*, SUM(c.quantity) AS sold FROM cartItem c JOIN  book b on c.book_id = b.id JOIN cart ca on ca.id = c.cart_id JOIN transaction t on t.cart_id = ca.id WHERE t.status = 'completed' OR t.status = 'on delivery' ${filter} GROUP BY c.book_id ORDER BY Sold DESC LIMIT 5;`,
+      );
       return topSalesProduct;
     } catch (error) {
       throw error;
     }
   };
 
-  public getTransactionReportList = async () => {
+  public getTransactionReportList = async (
+    user: User,
+    queryWarehouse: string | null,
+    queryMonth: string | null,
+    queryProduct: string | null,
+    queryCategory: string | null,
+    page: number | null,
+    limit: number | null,
+  ) => {
     try {
-      const lists = await prisma.transaction.findMany({
-        select: {
-          id: true,
-          status: true,
-          payment_method: true,
-          final_price: true,
-          warehouse: {
-            select: {
-              id: true,
-              warehouse_name: true,
-            },
+      let filterWarehouse = null;
+      if (user.role === 'super admin') {
+        if (queryWarehouse)
+          filterWarehouse = deleteHypeninString(queryWarehouse);
+      } else {
+        const warehouseAdmin = await prisma.warehouse.findFirstOrThrow({
+          where: {
+            warehouse_admin_id: user?.id,
           },
+        });
+        filterWarehouse = warehouseAdmin.warehouse_name;
+      }
+      let filters = '';
+      if (filterWarehouse) {
+        filters += `AND ${filterWarehouse ? `w.warehouse_name = '${filterWarehouse}'` : ''}`;
+      }
+      if (queryMonth) {
+        filters += `AND monthname(t.created_at)='${queryMonth}'`;
+      }
+      if (queryProduct) {
+        filters += `AND b.book_name = '${deleteHypeninString(queryProduct)}'`;
+      }
+      if (queryCategory) {
+        filters += `AND bc.book_category_name = '${deleteHypeninString(queryCategory)}'`;
+      }
+      let paginate = '';
+      if (page) {
+        const offset = (page - 1) * limit;
+        paginate = `limit ${limit} offset ${offset}`;
+      }
+      const query = `select t.id, t.status, t.created_at as tDate, t.payment_method, w.warehouse_name, sum(ci.total_price) as transaction_revenue from transaction t join cart c on c.id = t.cart_id join cartitem ci on ci.cart_id = c.id join warehouse w on t.warehouse_id = w.id join book b on b.id = ci.book_id join bookcategory bc on bc.id = b.book_category_id WHERE (t.status = 'completed' OR t.status = 'on delivery') ${filters ?? ''} group by ci.cart_id order by t.id ASC`;
+      const revenueData: [] = await prisma.$queryRawUnsafe(`${query}`);
+      const revenuePerTransaction = await prisma.$queryRawUnsafe(
+        `${query} ${paginate}`,
+      );
+      const totalPage = Math.ceil(revenueData.length / limit);
+      return { revenuePerTransaction, totalPage };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public getOverviewStockReport = async (
+    user: User,
+    queryMonth: string | null,
+    queryWarehouse: string | null,
+  ) => {
+    //Ringkasan laporan stok semua produk perbulan (total penambahan, total pengurangan dan stok akhir)
+    try {
+      const date = dateBetween;
+      let filter = {};
+
+      if (queryMonth) {
+        filter = {
+          ...filter,
+          created_at: date[queryMonth.toLowerCase()],
+        };
+      }
+
+      const role = user?.role;
+      if (role === 'super admin') {
+        if (queryWarehouse) {
+          const warehouse = await prisma.warehouse.findFirstOrThrow({
+            where: {
+              warehouse_name: deleteHypeninString(queryWarehouse),
+            },
+          });
+          filter = {
+            ...filter,
+            warehouseStock: {
+              warehouse_id: warehouse.id,
+            },
+          };
+        }
+      } else {
+        const warehouse = await prisma.warehouse.findFirstOrThrow({
+          where: {
+            warehouse_admin_id: user.id,
+          },
+        });
+        filter = {
+          ...filter,
+          warehouseStock: {
+            warehouse_id: warehouse.id,
+          },
+        };
+      }
+
+      const historyPlus = await prisma.jurnalStock.aggregate({
+        where: {
+          type: 'PLUS',
+          ...filter,
+        },
+        _sum: {
+          stockChange: true,
         },
       });
-      return lists;
-    } catch (error) {}
+      const historyMinus = await prisma.jurnalStock.aggregate({
+        where: {
+          type: 'MINUS',
+          ...filter,
+        },
+        _sum: {
+          stockChange: true,
+        },
+      });
+      const finalHistory = await prisma.jurnalStock.findMany({
+        where: {
+          ...filter,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+        distinct: ['warehouseStockId'],
+      });
+      const totalLastStock = finalHistory.reduce((item, currentItem) => {
+        return item + currentItem.newStock;
+      }, 0);
+      return {
+        stockPlus: historyPlus?._sum?.stockChange || 0,
+        stockMinus: historyMinus._sum.stockChange || 0,
+        finalStock: totalLastStock,
+      };
+    } catch (error) {
+      throw error;
+    }
   };
 }

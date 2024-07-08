@@ -30,7 +30,15 @@ export class ReportRouter {
     );
     this.router.get(
       '/sales-list',
+      this.authMiddleware.verifyToken,
+      this.authMiddleware.adminGuard,
       this.reportController.getTransactionReportList,
+    );
+    this.router.get(
+      '/stock-overview',
+      this.authMiddleware.verifyToken,
+      this.authMiddleware.adminGuard,
+      this.reportController.getOverviewStockReport,
     );
   }
 

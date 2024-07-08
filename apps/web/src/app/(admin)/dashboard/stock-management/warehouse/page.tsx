@@ -20,14 +20,13 @@ import { FormEvent, useRef, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import {
   useAddStockMutation,
-  useDeleteProductWarehouseMutation,
+  useRemoveStockMutation,
 } from '@/hooks/useWarehouseStockMutation';
 import { parseCurrency, parseDateTime } from '@/utils/convert';
 import { Link } from '@chakra-ui/next-js';
 import { useSearchParams } from 'next/navigation';
 import { MdDelete } from 'react-icons/md';
 import ModalStock from './component/modalAdd';
-import DialogDelete from './component/dialogDelete';
 export default function WarehouseStock() {
   const param = useSearchParams();
   const warehouseId = param.get('id') || 0;
@@ -37,33 +36,46 @@ export default function WarehouseStock() {
   const productList = listWarehouseStock?.data.data || [];
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
-    isOpen: isOpenDialog,
-    onOpen: onOpenDialog,
-    onClose: onCloseDialog,
+    isOpen: isOpenRemove,
+    onOpen: onOpenRemove,
+    onClose: onCloseRemove,
   } = useDisclosure();
   const [currentIdModal, setCurrentIdModal] = useState<number>(0);
   const { mutate: mutateAddStock } = useAddStockMutation();
-  const { mutate: deleteStock } = useDeleteProductWarehouseMutation();
+  const { mutate: mutateRemoveStock } = useRemoveStockMutation();
   const initialRef = useRef<HTMLInputElement>(null);
-  const openModal = (id: number) => {
+  const initialRefRemove = useRef<HTMLInputElement>(null);
+  const openModal = (id: number, remove: boolean = false) => {
     setCurrentIdModal(id);
-    onOpen();
+    if (remove) {
+      onOpenRemove();
+    } else onOpen();
   };
 
-  const openDialog = (id: number) => {
-    setCurrentIdModal(id);
-    onOpenDialog();
+  const handleRemove = (e: FormEvent) => {
+    e.preventDefault();
+    mutateRemoveStock(
+      {
+        id: currentIdModal,
+        stockSubtraction: initialRefRemove.current?.value
+          ? Number(initialRefRemove.current.value)
+          : 0,
+      },
+      { onSuccess: () => onCloseRemove() },
+    );
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    mutateAddStock({
-      id: currentIdModal,
-      stockAddition: initialRef.current?.value
-        ? Number(initialRef.current.value)
-        : 0,
-    });
-    onClose();
+    mutateAddStock(
+      {
+        id: currentIdModal,
+        stockAddition: initialRef.current?.value
+          ? Number(initialRef.current.value)
+          : 0,
+      },
+      { onSuccess: () => onClose() },
+    );
   };
 
   if (!isLoading) {
@@ -121,7 +133,7 @@ export default function WarehouseStock() {
                           cursor={'pointer'}
                           size={25}
                           onClick={() => {
-                            deleteStock(el.id);
+                            openModal(el.id, true);
                           }}
                         />
                       </Flex>
@@ -145,10 +157,12 @@ export default function WarehouseStock() {
           handleSubmit={handleSubmit}
           isDelete={false}
         />
-        <DialogDelete
-          isOpenDialog={isOpenDialog}
-          onCloseDialog={onCloseDialog}
-          currentIdModal={currentIdModal}
+        <ModalStock
+          isOpen={isOpenRemove}
+          onClose={onCloseRemove}
+          initialRef={initialRefRemove}
+          handleSubmit={handleRemove}
+          isDelete={true}
         />
       </Box>
     );

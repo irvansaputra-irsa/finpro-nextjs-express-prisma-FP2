@@ -312,6 +312,7 @@ export class MutationService {
           [el.warehouse.lat, el.warehouse.long],
         ),
         stockAvailable: el.stockQty,
+        city: el?.warehouse.warehouse_city,
       }));
       const sortedWarehouse = [...mapHaversineValue].sort(
         (a, b) => Number(a.distance) - Number(b.distance),

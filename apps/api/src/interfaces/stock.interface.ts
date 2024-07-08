@@ -15,6 +15,11 @@ export interface addStock {
   stockAddition: number;
 }
 
+export interface removeStock {
+  id: number;
+  stockSubtraction: number;
+}
+
 export interface updateStockMutation {
   senderWarehouseId: number;
   receiverWarehouseId: number;

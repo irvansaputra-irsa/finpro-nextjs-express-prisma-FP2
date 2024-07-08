@@ -84,7 +84,7 @@ export default function CartPage() {
   const toast = useToast();
   const { user } = useContext(AuthContext);
 
-  console.log('USER: ', user);
+  console.log('USER:', user);
 
   const checkIsCartEmpty = () => {
     if (items.length === 0) {

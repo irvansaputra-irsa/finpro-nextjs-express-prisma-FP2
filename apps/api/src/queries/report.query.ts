@@ -318,4 +318,61 @@ export class ReportQuery {
       throw error;
     }
   };
+
+  public getStockReportList = async (
+    user: User,
+    queryWarehouse: string | null,
+    queryMonth: string | null,
+  ) => {
+    try {
+      const date = dateBetween;
+      let filter = {};
+
+      if (queryMonth) {
+        filter = {
+          ...filter,
+          created_at: date[queryMonth.toLowerCase()],
+        };
+      }
+
+      const role = user?.role;
+      if (role === 'super admin') {
+        if (queryWarehouse) {
+          const warehouse = await prisma.warehouse.findFirstOrThrow({
+            where: {
+              warehouse_name: deleteHypeninString(queryWarehouse),
+            },
+          });
+          filter = {
+            ...filter,
+            warehouseStock: {
+              warehouse_id: warehouse.id,
+            },
+          };
+        }
+      } else {
+        const warehouse = await prisma.warehouse.findFirstOrThrow({
+          where: {
+            warehouse_admin_id: user.id,
+          },
+        });
+        filter = {
+          ...filter,
+          warehouseStock: {
+            warehouse_id: warehouse.id,
+          },
+        };
+      }
+
+      const stockReports = await prisma.jurnalStock.findMany({
+        where: {
+          ...filter,
+        },
+      });
+
+      return stockReports;
+    } catch (error) {
+      throw error;
+    }
+  };
 }

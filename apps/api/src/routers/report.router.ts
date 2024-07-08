@@ -40,6 +40,12 @@ export class ReportRouter {
       this.authMiddleware.adminGuard,
       this.reportController.getOverviewStockReport,
     );
+    this.router.get(
+      '/stock-list',
+      this.authMiddleware.verifyToken,
+      this.authMiddleware.adminGuard,
+      this.reportController.getStockReportList,
+    );
   }
 
   getRouter(): Router {

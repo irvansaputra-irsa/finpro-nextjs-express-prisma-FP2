@@ -103,4 +103,28 @@ export class ReportController {
       next(error);
     }
   };
+  public getStockReportList = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const user = req.user;
+      const { _warehouse, _month } = req.query;
+      const queryMonth = _month?.toString() || null;
+      const queryWarehouse = _warehouse?.toString() || null;
+
+      const data = await this.reportQuery.getStockReportList(
+        user,
+        queryMonth,
+        queryWarehouse,
+      );
+
+      return res
+        .status(200)
+        .json({ message: 'get stock reports success', data });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

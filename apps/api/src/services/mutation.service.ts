@@ -304,19 +304,33 @@ export class MutationService {
           warehouseId,
         );
       //2. buat list nearest warehouse pake haversine
-      const mapHaversineValue = listWarehouse.map((el, idx) => ({
-        warehouse: el.warehouse_id,
-        warehouseName: el.warehouse.warehouse_name,
-        distance: this.haversineFormula(
-          [lat, long],
-          [el.warehouse.lat, el.warehouse.long],
-        ),
-        stockAvailable: el.stockQty,
-        city: el?.warehouse.warehouse_city,
-      }));
-      const sortedWarehouse = [...mapHaversineValue].sort(
-        (a, b) => Number(a.distance) - Number(b.distance),
-      );
+      let sortedWarehouse = [];
+      if (bookId && warehouseId) {
+        const mapHaversineValue = listWarehouse.map((el, idx) => ({
+          warehouse: el.warehouse_id,
+          warehouseName: el.warehouse.warehouse_name,
+          distance: this.haversineFormula(
+            [lat, long],
+            [el.warehouse.lat, el.warehouse.long],
+          ),
+          stockAvailable: el.stockQty,
+          city: el?.warehouse.warehouse_city,
+        }));
+        sortedWarehouse = [...mapHaversineValue].sort(
+          (a, b) => Number(a.distance) - Number(b.distance),
+        );
+      } else {
+        const mapHaversineValue = listWarehouse.map((el, idx) => ({
+          warehouse: el?.id,
+          warehouseName: el?.warehouse_name,
+          distance: this.haversineFormula([lat, long], [el?.lat, el?.long]),
+          stockAvailable: 0,
+          city: el?.warehouse_city,
+        }));
+        sortedWarehouse = [...mapHaversineValue].sort(
+          (a, b) => Number(a.distance) - Number(b.distance),
+        );
+      }
       return sortedWarehouse;
     } catch (error) {
       throw error;

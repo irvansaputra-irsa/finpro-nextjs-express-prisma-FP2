@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 export default function TransactionPage() {
   const [cardId, setCartId] = useState<string>('');
   const [addrId, setAddrId] = useState<string>('');
+  const [warehouseId, setWarehouseId] = useState<string>('');
   const [hargaOngkir, setHargaOngkir] = useState<string>('');
   const [hargaBuku, setHargaBuku] = useState<string>('');
   const [hargaTotal, setHargaTotal] = useState<number>(0);
@@ -57,6 +58,16 @@ export default function TransactionPage() {
     const storedHargaBuku = window.sessionStorage.getItem('hargaBuku');
     if (storedHargaBuku) {
       setHargaBuku(storedHargaBuku.toString());
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedWarehouse = window.sessionStorage.getItem('selectedWarehouse');
+    if (storedWarehouse) {
+      const warehouse = JSON.parse(storedWarehouse);
+      if (warehouse) {
+        setWarehouseId(warehouse?.warehouse?.toString());
+      }
     }
   }, []);
 
@@ -120,7 +131,7 @@ export default function TransactionPage() {
         confirmation_date: null,
         final_price: hargaTotal,
         destination_id: parseInt(addrId),
-        warehouse_id: 1,
+        warehouse_id: parseInt(warehouseId),
         cart_id: parseInt(cardId),
       };
 

@@ -69,6 +69,7 @@ const fetchNearestWarehouse = async (lat: string, long: string) => {
 
     if (response.ok) {
       const data = await response.json();
+      console.log('🚀 ~ fetchNearestWarehouse ~ list nearest warehouse:', data);
       return data;
     } else {
       throw new Error('Failed to fetch nearest warehouse');
@@ -156,7 +157,6 @@ export default function CartPage() {
       setAddress(JSON.parse(storedAddress));
     } else {
       const fetchDefaultAddress = async () => {
-        console.log(userId);
         try {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_BASE_API_URL}/address/default`,
@@ -180,7 +180,7 @@ export default function CartPage() {
         }
       };
 
-      fetchDefaultAddress();
+      if (userId) fetchDefaultAddress();
     }
   }, [userId]);
 
@@ -208,7 +208,7 @@ export default function CartPage() {
       }
     };
 
-    fetchCartId();
+    if (userId) fetchCartId();
   }, [userId]);
 
   useEffect(() => {
@@ -272,7 +272,7 @@ export default function CartPage() {
         if (response.ok) {
           const data = await response.json();
           console.log('ini city id yang diterima:', data);
-          setOriginAddressId(data.cityId);
+          setOriginAddressId(data?.cityId);
         } else {
           throw new Error('Failed to fetch cart ID');
         }
@@ -293,6 +293,10 @@ export default function CartPage() {
           const data = await fetchNearestWarehouse(address.lat, address.long);
           nearestWareHouseCity = data.data[0].city;
           console.log('Nearest WH CName:', nearestWareHouseCity);
+          sessionStorage.setItem(
+            'selectedWarehouse',
+            JSON.stringify(data?.data[0]),
+          );
         }
 
         const response = await fetch(

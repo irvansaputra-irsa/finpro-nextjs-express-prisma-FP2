@@ -9,15 +9,13 @@ export class RajaOngkirQuery {
   ): Promise<number> => {
     try {
       const { cityName } = param;
-      console.log('TEST', cityName);
+
       const data = await prisma.rajaOngkir.findFirst({
         where: {
           city_name: cityName,
         },
       });
-
-      console.log(data);
-
+      if (!data) throw new Error('city is not valid');
       return data.city_id;
     } catch (error) {
       throw error;

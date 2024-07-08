@@ -1,4 +1,4 @@
-import { IaddStock } from '@/interface/stock.interface';
+import { IaddStock, IremoveStock } from '@/interface/stock.interface';
 import { errorResponse } from '@/types/errorResponse';
 import instance from '@/utils/axiosInstance';
 import { useToast } from '@chakra-ui/react';
@@ -107,6 +107,41 @@ export const useDeleteProductWarehouseMutation = () => {
       toast({
         title: 'Success',
         description: 'Product successfully deleted at this warehouse',
+        status: 'success',
+        duration: 9000,
+        isClosable: true,
+      });
+    },
+  });
+};
+
+export const useRemoveStockMutation = () => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  return useMutation({
+    mutationFn: async (payload: IremoveStock) => {
+      const res = await instance.patch('/stock/remove', payload);
+      return res;
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err)) {
+        const res = err.response?.data as errorResponse;
+        toast({
+          title: 'Failed to remove stock',
+          description: res.message || 'An error occurred while submitting.',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [`warehouse-stock`],
+      });
+      toast({
+        title: 'Success',
+        description: 'Product stock successfully removed',
         status: 'success',
         duration: 9000,
         isClosable: true,

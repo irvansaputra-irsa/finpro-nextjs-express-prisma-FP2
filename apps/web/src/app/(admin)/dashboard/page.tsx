@@ -1,14 +1,41 @@
 'use client';
+import Paginate from '@/components/pagination/paginate';
 import { AuthContext } from '@/context/Auth';
 import { useProductCategory, useProductsName } from '@/hooks/useProduct';
-import { useGetRevenueMonth, useGetTopSellingProduct } from '@/hooks/useReport';
+import {
+  useGetRevenueMonth,
+  useGetTopSellingProduct,
+  useReportStockOverview,
+  useReportTransaction,
+} from '@/hooks/useReport';
 import { useListWarehouse } from '@/hooks/useWarehouse';
 import {
+  bookTopSell,
   productCategory,
   productNameList,
 } from '@/interface/product.interface';
 import { listWarehouseInterface } from '@/interface/warehouse.interface';
-import { Box, Flex, Heading, Select, SimpleGrid } from '@chakra-ui/react';
+import {
+  parseCurrency,
+  parseDate,
+  parseDateTime,
+  separateStringHyphen,
+} from '@/utils/convert';
+import {
+  Box,
+  Flex,
+  Heading,
+  Select,
+  SimpleGrid,
+  Stack,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
 import {
   CartesianGrid,
@@ -22,14 +49,46 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
+  Rectangle,
 } from 'recharts';
+
+type customizedPieChart = {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+  index: number;
+};
+type transactionReportList = {
+  id: number;
+  status: 'on delivery' | 'completed';
+  payment_method: string;
+  transaction_revenue: number;
+  warehouse_name: string;
+  tDate: Date;
+};
 
 export default function Dashboard() {
   const { user } = useContext(AuthContext);
   const userRole = user?.role;
+  const [page, setPage] = useState(1);
   const [categoryF, setCategoryF] = useState('');
   const [productF, setProductF] = useState('');
-  const [warehouseF, setWarehouseF] = useState(0);
+  const [warehouseF, setWarehouseF] = useState('');
+  const [monthF, setMonthF] = useState('');
+  const listMonthOption = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+  ];
   const { data: revenue, isSuccess } = useGetRevenueMonth(
     categoryF,
     productF,
@@ -52,11 +111,12 @@ export default function Dashboard() {
     { name: 'April', value: revenuePerMonth.aprilRevenue?.revenue },
     { name: 'May', value: revenuePerMonth.mayRevenue?.revenue },
     { name: 'June', value: revenuePerMonth.juneRevenue?.revenue },
+    { name: 'July', value: revenuePerMonth.julyRevenue?.revenue },
   ];
 
   const { data: topSelling, isSuccess: isTopSellFetched } =
-    useGetTopSellingProduct();
-  const listTopSelling = topSelling?.data || [];
+    useGetTopSellingProduct(warehouseF);
+  const listTopSelling: bookTopSell[] = topSelling?.data || [];
 
   const dataTopSell = listTopSelling.map((el) => ({
     name: el.book_name,
@@ -74,7 +134,7 @@ export default function Dashboard() {
     outerRadius,
     percent,
     index,
-  }) => {
+  }: customizedPieChart) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -92,62 +152,108 @@ export default function Dashboard() {
     );
   };
 
+  const { data: trList, isPlaceholderData } = useReportTransaction(
+    warehouseF,
+    monthF,
+    productF,
+    categoryF,
+    page,
+  );
+  const transactionList = trList?.data?.data?.revenuePerTransaction || [];
+  const transactionTotalPage = trList?.data?.data?.totalPage || 0;
+  const handleClickButton = (type: string): void => {
+    if (type === 'next') {
+      setPage((old: number) => old + 1);
+    }
+    if (type === 'prev') {
+      setPage((old: number) => Math.max(old - 1, 1));
+    }
+  };
+
+  //stock report
+  const { data: stockOverview } = useReportStockOverview(warehouseF, monthF);
+  const overviewStockData = stockOverview?.data.data;
+  const dataBar = Array(overviewStockData);
+
   return (
-    <Box h={'100vh'}>
-      <Box p={15} my={25}>
-        <Heading size={'4xl'}>Sales Report</Heading>
+    <Stack gap={50} p={20}>
+      <Flex justifyContent={'space-between'}>
+        <Box p={15} my={25}>
+          <Heading size={'4xl'}>Dashboard Report</Heading>
+        </Box>
+        <Box px={5} py={10}>
+          {userRole === 'super admin' && (
+            <Select
+              border={'1px solid black'}
+              variant={'outline'}
+              size={'lg'}
+              placeholder="All Warehouses"
+              w={300}
+              onChange={(e) =>
+                setWarehouseF(separateStringHyphen(e.target.value))
+              }
+            >
+              {listWarehouse.map((el) => (
+                <option key={el.id} value={el.warehouse_name}>
+                  {el.warehouse_name}
+                </option>
+              ))}
+            </Select>
+          )}
+        </Box>
+      </Flex>
+      <Box bgColor={'whiteAlpha'}>
+        <Flex gap={8}>
+          <Select
+            border={'1px solid black'}
+            variant={'outline'}
+            size={'md'}
+            placeholder="All categories"
+            w={200}
+            onChange={(e) => setCategoryF(e.target.value)}
+          >
+            {listCategory.map((el) => (
+              <option key={el.id} value={el.book_category_name}>
+                {el.book_category_name}
+              </option>
+            ))}
+          </Select>
+          <Select
+            variant={'outline'}
+            border={'1px solid black'}
+            size={'md'}
+            placeholder="All Products"
+            w={200}
+            onChange={(e) => setProductF(e.target.value)}
+          >
+            {listProduct.map((el) => (
+              <option key={el.id} value={el.book_name}>
+                {el.book_name}
+              </option>
+            ))}
+          </Select>
+          <Select
+            variant={'outline'}
+            border={'1px solid black'}
+            size={'md'}
+            placeholder="All months"
+            w={200}
+            onChange={(e) => setMonthF(e.target.value)}
+          >
+            {listMonthOption.map((month, idx) => (
+              <option key={idx} value={month}>
+                {month}
+              </option>
+            ))}
+          </Select>
+        </Flex>
       </Box>
-      <SimpleGrid columns={2} h={'50%'} gap={35}>
-        <Box bgColor={'#F7F9F2'}>
-          <Heading size={'xl'} textAlign={'center'} mt={15} mb={25}>
-            Revenue Store
+      <Heading size={'2xl'}>Sales Report</Heading>
+      <SimpleGrid columns={2} gap={35}>
+        <Box bgColor={'#F7F9F2'} pt={20}>
+          <Heading size={'2xl'} textAlign={'center'}>
+            Revenue
           </Heading>
-          <Flex gap={8} pl={30}>
-            <Select
-              border={'1px solid black'}
-              variant={'outline'}
-              size={'sm'}
-              placeholder="All categories"
-              w={200}
-              onChange={(e) => setCategoryF(e.target.value)}
-            >
-              {listCategory.map((el) => (
-                <option key={el.id} value={el.book_category_name}>
-                  {el.book_category_name}
-                </option>
-              ))}
-            </Select>
-            <Select
-              variant={'outline'}
-              border={'1px solid black'}
-              size={'sm'}
-              placeholder="All Products"
-              w={200}
-              onChange={(e) => setProductF(e.target.value)}
-            >
-              {listProduct.map((el) => (
-                <option key={el.id} value={el.book_name}>
-                  {el.book_name}
-                </option>
-              ))}
-            </Select>
-            {userRole === 'super admin' && (
-              <Select
-                border={'1px solid black'}
-                variant={'outline'}
-                size={'sm'}
-                placeholder="All Warehouses"
-                w={200}
-                onChange={(e) => setWarehouseF(Number(e.target.value))}
-              >
-                {listWarehouse.map((el) => (
-                  <option key={el.id} value={el.id}>
-                    {el.warehouse_name}
-                  </option>
-                ))}
-              </Select>
-            )}
-          </Flex>
           <Box mt={5} height="80%" p={10}>
             {isSuccess ? (
               <ResponsiveContainer width="100%" height="80%">
@@ -186,7 +292,7 @@ export default function Dashboard() {
             Top Selling Product
           </Heading>
           {isTopSellFetched && (
-            <ResponsiveContainer width="100%" height="80%">
+            <ResponsiveContainer width="100%" height={500}>
               <PieChart width={400} height={400}>
                 <Pie
                   data={dataTopSell}
@@ -215,6 +321,94 @@ export default function Dashboard() {
           )}
         </Box>
       </SimpleGrid>
-    </Box>
+      <Box>
+        <TableContainer>
+          <Table variant="striped">
+            <Thead>
+              <Tr>
+                <Th>Transaction ID</Th>
+                <Th>Status</Th>
+                <Th>Payment Method</Th>
+                <Th>Warehouse</Th>
+                <Th>Date</Th>
+                <Th isNumeric>Value Transaction</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {transactionList.length ? (
+                transactionList.map((tr: transactionReportList) => (
+                  <Tr key={tr.id}>
+                    <Td>{tr?.id}</Td>
+                    <Td>{tr?.status}</Td>
+                    <Td>{tr.payment_method}</Td>
+                    <Td>{tr.warehouse_name}</Td>
+                    <Td>{parseDate(tr.tDate)}</Td>
+                    <Td isNumeric> {parseCurrency(tr.transaction_revenue)}</Td>
+                  </Tr>
+                ))
+              ) : (
+                <Tr>
+                  <Td textAlign={'center'} colSpan={100}>
+                    No data found
+                  </Td>
+                </Tr>
+              )}
+            </Tbody>
+          </Table>
+          {transactionList.length > 0 && (
+            <Paginate
+              isPlaceholderData={isPlaceholderData}
+              page={page}
+              totalPages={transactionTotalPage}
+              handleClickButton={handleClickButton}
+            />
+          )}
+        </TableContainer>
+      </Box>
+      <Box>
+        <Heading size={'2xl'} my={10}>
+          Stock Report
+        </Heading>
+        <Box height={'500px'}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              width={500}
+              height={300}
+              data={dataBar}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar
+                dataKey="stockPlus"
+                name={'Stock Plus'}
+                fill="#82ca9d"
+                activeBar={<Rectangle fill="green" stroke="#9BEC00" />}
+              />
+              <Bar
+                dataKey="stockMinus"
+                name={'Stock Minus'}
+                fill="#C80036"
+                activeBar={<Rectangle fill="red" stroke="#FF6969" />}
+              />
+              <Bar
+                name={'Final Stock'}
+                dataKey="finalStock"
+                fill="#00000"
+                activeBar={<Rectangle fill="white" stroke="silver" />}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+    </Stack>
   );
 }

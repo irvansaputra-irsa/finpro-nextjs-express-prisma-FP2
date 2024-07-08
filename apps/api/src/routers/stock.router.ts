@@ -30,6 +30,13 @@ export class StockRouter {
       this.authMiddleware.adminGuard,
       this.stockController.addStockController,
     );
+    //ngurangin stock dr product yg udah ada di warehouse
+    this.router.patch(
+      '/remove',
+      this.authMiddleware.verifyToken,
+      this.authMiddleware.adminGuard,
+      this.stockController.removeStockController,
+    );
     // get list product yang sudah ditambahkan ke warehouse
     this.router.get(
       '/:id',

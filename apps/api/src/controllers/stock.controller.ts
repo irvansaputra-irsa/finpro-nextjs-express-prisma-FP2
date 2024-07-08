@@ -34,7 +34,24 @@ export class StockController {
       const data = await this.stockService.addStockService(param);
 
       res.status(200).json({
-        message: 'Add new warehouse stock success',
+        message: 'Add stock success',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public removeStockController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const param = req.body;
+      const data = await this.stockService.removeStockService(param);
+
+      res.status(200).json({
+        message: 'Remove stock success',
         data,
       });
     } catch (error) {

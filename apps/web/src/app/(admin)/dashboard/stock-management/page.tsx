@@ -73,7 +73,7 @@ export default function StockList() {
                   </Flex>
                 </Hide>
               </Box>
-            </Flex>{' '}
+            </Flex>
           </Box>
         ))}
       </SimpleGrid>

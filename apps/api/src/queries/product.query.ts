@@ -4,6 +4,7 @@ import prisma from '@/prisma';
 import { Book, BookImage, Prisma } from '@prisma/client';
 import { join } from 'path';
 import fs from 'fs';
+import { deleteHypeninString } from '@/utils/convert.utils';
 
 @Service()
 export class ProductQuery {
@@ -224,9 +225,10 @@ export class ProductQuery {
 
   public getProductQuery = async (book_name: string) => {
     try {
+      const bookName = deleteHypeninString(book_name);
       const data = await prisma.book.findFirstOrThrow({
         where: {
-          book_name,
+          book_name: bookName,
         },
         include: {
           BookImage: true,

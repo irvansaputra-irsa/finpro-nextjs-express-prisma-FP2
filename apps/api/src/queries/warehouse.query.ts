@@ -69,37 +69,37 @@ export class WarehouseQuery {
     warehouseId: number,
   ) => {
     try {
-      const query = bookId
-        ? {
-            AND: [
-              {
-                book_id: bookId,
-              },
-              {
-                stockQty: {
-                  gt: 0,
+      if (bookId && warehouseId) {
+        const query = bookId
+          ? {
+              AND: [
+                {
+                  book_id: bookId,
                 },
+                {
+                  stockQty: {
+                    gt: 0,
+                  },
+                },
+              ],
+              NOT: {
+                warehouse_id: warehouseId,
               },
-            ],
-            NOT: {
-              warehouse_id: warehouseId,
-            },
-          }
-        : {};
-      const listBook = await prisma.warehouseStock.findMany({
-        where: query,
-        include: {
-          warehouse: true,
-        },
-      });
-      return listBook;
+            }
+          : {};
+        const listBook = await prisma.warehouseStock.findMany({
+          where: query,
+          include: {
+            warehouse: true,
+          },
+        });
+        return listBook;
+      } else {
+        const listWarehouse = await prisma.warehouse.findMany();
+        return listWarehouse;
+      }
     } catch (error) {
       throw error;
     }
-  };
-
-  public findWarehouseById = async () => {
-    try {
-    } catch (error) {}
   };
 }

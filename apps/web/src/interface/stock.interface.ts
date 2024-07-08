@@ -5,6 +5,10 @@ export interface IaddStock {
   id: number;
   stockAddition: number;
 }
+export interface IremoveStock {
+  id: number;
+  stockSubtraction: number;
+}
 
 export interface productStock {
   id: number;

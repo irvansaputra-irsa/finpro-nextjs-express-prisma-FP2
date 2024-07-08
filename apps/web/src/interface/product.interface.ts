@@ -37,3 +37,7 @@ export interface productNameList {
   id: number;
   book_name: string;
 }
+
+export interface bookTopSell extends product {
+  sold: number;
+}

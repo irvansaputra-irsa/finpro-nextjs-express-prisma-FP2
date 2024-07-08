@@ -26,7 +26,11 @@ export default function DialogDelete({
   const handleDelete = () => {
     if (currentIdModal) {
       const id = Number(currentIdModal);
-      deleteStock(id);
+      deleteStock(id, {
+        onSuccess: () => {
+          onCloseDialog();
+        },
+      });
     }
   };
   return (

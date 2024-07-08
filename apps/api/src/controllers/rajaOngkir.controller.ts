@@ -18,7 +18,7 @@ export class RajaOngkirController {
 
       res.status(200).json({ cityId });
     } catch (error) {
-      throw error;
+      next(error);
     }
   };
 }

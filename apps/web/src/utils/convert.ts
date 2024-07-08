@@ -10,6 +10,11 @@ const parseDateTime = (date: Date) => {
   return format.toLocaleString('id-ID', { timeZoneName: 'short' });
 };
 
+const parseDate = (date: Date) => {
+  const format = new Date(date);
+  return format.toLocaleString('en-US', { dateStyle: 'medium' });
+};
+
 const separateStringHyphen = (str: string) => {
   const split = str.split(' ');
   return split.join('-').toLowerCase();
@@ -28,4 +33,5 @@ export {
   separateStringHyphen,
   removeHypenInString,
   returnImgURl,
+  parseDate,
 };

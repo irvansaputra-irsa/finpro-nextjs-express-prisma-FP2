@@ -25,6 +25,7 @@ export default function ModalStock({
   onClose,
   initialRef,
   handleSubmit,
+  isDelete,
 }: props) {
   return (
     <Modal
@@ -36,7 +37,7 @@ export default function ModalStock({
       <form onSubmit={(e) => handleSubmit(e)}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Add stock</ModalHeader>
+          <ModalHeader>{isDelete ? 'Remove stock' : 'Add stock'}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <FormControl>

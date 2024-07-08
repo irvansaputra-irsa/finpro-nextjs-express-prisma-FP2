@@ -22,6 +22,12 @@ export default function Navbar() {
   const bg = useColorModeValue('white', 'gray.800');
   const mobileNav = useDisclosure();
   const { user, useLogout } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    useLogout();
+    sessionStorage.clear();
+  };
+
   const authNavbar = () => {
     if (!user) {
       return (
@@ -46,7 +52,7 @@ export default function Navbar() {
               Cart
             </Button>
           </Link>
-          <Link href="/login" onClick={() => useLogout()}>
+          <Link href="/login" onClick={() => handleLogout()}>
             <Button w="full" variant="ghost">
               Log out
             </Button>

@@ -119,6 +119,105 @@ const AdminTransactionPage = () => {
     }
   };
 
+  const handleAccept = async (transactionId: number, status: string) => {
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/transaction/accept`,
+        {
+          transactionId,
+        },
+      );
+      toast({
+        title: 'Transaction status updated',
+        description: `The transaction status has been updated to ${status}.`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      fetchTransactions();
+    } catch (error) {
+      let message;
+      if (error instanceof Error) {
+        message = error.message;
+      } else {
+        message = String(error);
+      }
+      toast({
+        title: 'Error updating transaction status',
+        description: message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleCancel = async (transactionId: number, status: string) => {
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/transaction/cancel`,
+        {
+          transactionId,
+        },
+      );
+      toast({
+        title: 'Transaction status updated',
+        description: `The transaction status has been updated to ${status}.`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      fetchTransactions();
+    } catch (error) {
+      let message;
+      if (error instanceof Error) {
+        message = error.message;
+      } else {
+        message = String(error);
+      }
+      toast({
+        title: 'Error updating transaction status',
+        description: message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleSend = async (transactionId: number, status: string) => {
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/transaction/send`,
+        {
+          transactionId,
+        },
+      );
+      toast({
+        title: 'Transaction status updated',
+        description: `The transaction status has been updated to ${status}.`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      fetchTransactions();
+    } catch (error) {
+      let message;
+      if (error instanceof Error) {
+        message = error.message;
+      } else {
+        message = String(error);
+      }
+      toast({
+        title: 'Error updating transaction status',
+        description: message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Box display="flex" justifyContent="center" minH="100vh" p={4}>
       <VStack spacing={4} textAlign="center">
@@ -170,7 +269,7 @@ const AdminTransactionPage = () => {
                          * Disini, setelah status berubah menjadi on process,
                          * pastikan kesiapan barang, mutasi, dkk.
                          */
-                        handleUpdateStatus(transaction.id, 'ready');
+                        handleAccept(transaction.id, 'ready');
                       }}
                       isDisabled={transaction.status !== 'waiting approval'}
                       mr="2"
@@ -192,9 +291,7 @@ const AdminTransactionPage = () => {
                 <Td>
                   <Button
                     colorScheme="blue"
-                    onClick={() =>
-                      handleUpdateStatus(transaction.id, 'on delivery')
-                    }
+                    onClick={() => handleSend(transaction.id, 'on delivery')}
                     isDisabled={transaction.status !== 'ready'}
                   >
                     Ship
@@ -203,9 +300,7 @@ const AdminTransactionPage = () => {
                 <Td>
                   <Button
                     colorScheme="orange"
-                    onClick={() =>
-                      handleUpdateStatus(transaction.id, 'cancelled')
-                    }
+                    onClick={() => handleCancel(transaction.id, 'cancelled')}
                     isDisabled={
                       transaction.status === 'on delivery' ||
                       transaction.status === 'cancelled' ||

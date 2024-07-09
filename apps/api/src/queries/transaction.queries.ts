@@ -56,6 +56,7 @@ export class TransactionQuery {
 
   public getUserTransactions = async (params: GetTransactionsParams) => {
     const { userId, searchDate } = params;
+    console.log('search date', searchDate);
 
     const carts = await prisma.cart.findMany({
       where: { user_id: userId },

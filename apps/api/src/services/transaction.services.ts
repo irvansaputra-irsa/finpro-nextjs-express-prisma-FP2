@@ -211,14 +211,40 @@ export class TransactionService {
     }
   };
 
-  public getAdminTransactions = async (userId: number, role: string) => {
+  public getAdminTransactions = async (
+    userId: number,
+    role: string,
+    searchDate: string,
+  ) => {
     try {
       if (role === 'super admin') {
-        return await prisma.transaction.findMany({
-          orderBy: {
-            created_at: 'desc',
-          },
-        });
+        if (searchDate === '') {
+          return await prisma.transaction.findMany({
+            orderBy: {
+              created_at: 'desc',
+            },
+          });
+        } else {
+          const startDate = new Date(searchDate);
+          const endDate = new Date(
+            new Date(searchDate).setDate(new Date(searchDate).getDate() + 1),
+          );
+
+          // Set from UTC + 7 to UTC + 0
+          startDate.setHours(startDate.getHours() - 7);
+          endDate.setHours(endDate.getHours() - 7);
+          return await prisma.transaction.findMany({
+            where: {
+              created_at: {
+                gte: startDate,
+                lt: endDate,
+              },
+            },
+            orderBy: {
+              created_at: 'desc',
+            },
+          });
+        }
       } else {
         const warehouse = await prisma.warehouse.findUnique({
           where: { warehouse_admin_id: userId },
@@ -228,12 +254,32 @@ export class TransactionService {
           throw new Error('No warehouse assigned to this admin.');
         }
 
-        return await prisma.transaction.findMany({
-          where: { warehouse_id: warehouse.id },
-          orderBy: {
-            created_at: 'desc',
-          },
-        });
+        if (searchDate === '') {
+          return await prisma.transaction.findMany({
+            where: { warehouse_id: warehouse.id },
+            orderBy: {
+              created_at: 'desc',
+            },
+          });
+        } else {
+          const startDate = new Date(searchDate);
+          const endDate = new Date(
+            new Date(searchDate).setDate(new Date(searchDate).getDate() + 1),
+          );
+
+          // Set from UTC + 7 to UTC + 0
+          startDate.setHours(startDate.getHours() - 7);
+          endDate.setHours(endDate.getHours() - 7);
+          return await prisma.transaction.findMany({
+            where: {
+              warehouse_id: warehouse.id,
+              created_at: {
+                gte: startDate,
+                lt: endDate,
+              },
+            },
+          });
+        }
       }
     } catch (error) {
       throw error;

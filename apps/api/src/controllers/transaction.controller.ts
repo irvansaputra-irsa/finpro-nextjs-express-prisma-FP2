@@ -19,6 +19,7 @@ export class TransactionController {
     try {
       const userId = parseInt(req.body.userId as string, 10);
       const searchDate = req.body.searchDate as string;
+      console.log('======== SEARCH DATE =========', searchDate);
 
       if (isNaN(userId)) {
         throw new Error('Invalid userId');
@@ -143,6 +144,7 @@ export class TransactionController {
     try {
       const userId = parseInt(req.body.userId as string, 10);
       const role = req.body.role as string;
+      const searchDate = req.body.searchDate as string;
 
       if (isNaN(userId) || !role) {
         throw new Error('Invalid userId or role');
@@ -151,6 +153,7 @@ export class TransactionController {
       const transactions = await this.transactionService.getAdminTransactions(
         userId,
         role,
+        searchDate,
       );
       res.status(200).json(transactions);
     } catch (error) {

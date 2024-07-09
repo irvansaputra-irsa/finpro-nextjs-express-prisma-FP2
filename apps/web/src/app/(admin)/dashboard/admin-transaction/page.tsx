@@ -45,8 +45,9 @@ const AdminTransactionPage = () => {
   const [userRole, setUserRole] = useState('super admin');
 
   useEffect(() => {
+    console.log('date changes');
     fetchTransactions();
-  }, [page, searchDate]);
+  }, [searchDate]);
 
   const fetchTransactions = async () => {
     try {
@@ -59,6 +60,7 @@ const AdminTransactionPage = () => {
         },
       );
 
+      console.log(response.data);
       setTransactions(response.data);
     } catch (error) {
       let message;

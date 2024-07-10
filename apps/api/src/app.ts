@@ -58,18 +58,6 @@ export default class App {
         next();
       }
     });
-
-    // error
-    // this.app.use(
-    //   (err: Error, req: Request, res: Response, next: NextFunction) => {
-    //     if (req.path.includes('/api/')) {
-    //       console.error('Error : ', err.stack);
-    //       res.status(500).send('Error !');
-    //     } else {
-    //       next();
-    //     }
-    //   },
-    // );
     this.app.use(ErrorMiddleware);
   }
 

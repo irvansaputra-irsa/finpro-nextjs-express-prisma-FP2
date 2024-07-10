@@ -69,7 +69,7 @@ export default function InnerForm(props: any) {
       }));
       setPreview(formatted);
     }
-  }, []);
+  }, [additionalProp]);
 
   const uploadImg = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -454,7 +454,12 @@ export default function InnerForm(props: any) {
                     preview.map((el, idx) => (
                       <Stack key={idx}>
                         <Box border={idx + 1 === 1 ? 'red solid 4px' : ''}>
-                          <Image w={'240px'} h={'135px'} src={el?.source} />
+                          <Image
+                            w={'240px'}
+                            h={'135px'}
+                            src={el?.source}
+                            alt="book image(s)"
+                          />
                         </Box>
                         <IconButton
                           aria-label="Delete image"

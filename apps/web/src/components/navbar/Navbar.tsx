@@ -16,15 +16,14 @@ import React, { useContext } from 'react';
 import { AiOutlineMenu } from 'react-icons/ai';
 import Logo from '../logo/logo';
 import { AuthContext } from '@/context/Auth';
-import Cookies from 'js-cookie';
 
 export default function Navbar() {
   const bg = useColorModeValue('white', 'gray.800');
   const mobileNav = useDisclosure();
-  const { user, useLogout } = useContext(AuthContext);
+  const { user, useLogout: UseLogout } = useContext(AuthContext);
 
   const handleLogout = () => {
-    useLogout();
+    UseLogout();
     sessionStorage.clear();
   };
 

@@ -1,7 +1,6 @@
 'use client';
 import { Box, Divider, GridItem, Heading, SimpleGrid } from '@chakra-ui/react';
 import { withFormik } from 'formik';
-import * as Yup from 'yup';
 
 import InnerForm from './component/InnerForm';
 import { useSearchParams } from 'next/navigation';
@@ -35,7 +34,7 @@ export default function ProductCategoryForm() {
     if (slugProduct && isErrFindProduct) {
       throw new Error('Category not found');
     }
-  }, [isErrFindProduct]);
+  }, [isErrFindProduct, slugProduct]);
 
   const CategoryForm = withFormik<FormProps, FormValues>({
     mapPropsToValues: (props) => ({

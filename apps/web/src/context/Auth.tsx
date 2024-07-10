@@ -54,10 +54,10 @@ export const AuthProvider = (props: any) => {
 
   const useLogin = (userDetail: IUser, token: string): void => {
     if (token) {
-      const in30Minutes = 1 / 48;
+      const anHour = 1 / 24;
       setUser(userDetail);
       Cookies.set('token', token, {
-        expires: in30Minutes,
+        expires: anHour,
       });
     }
   };

@@ -34,9 +34,12 @@ export class ReportController {
       const user = req.user;
       const { _warehouse, _month } = req.query;
       const queryWarehouse = _warehouse?.toString() || null;
+      const queryMonth = _month?.toString() || null;
+
       const data = await this.reportQuery.topSellingProduct(
         user,
         queryWarehouse,
+        queryMonth,
       );
 
       return res.status(200).json(data);
@@ -110,14 +113,18 @@ export class ReportController {
   ) => {
     try {
       const user = req.user;
-      const { _warehouse, _month } = req.query;
+      const { _warehouse, _month, _page, _limit } = req.query;
       const queryMonth = _month?.toString() || null;
       const queryWarehouse = _warehouse?.toString() || null;
+      const page = Number(_page) || null;
+      const limit = Number(_limit) || 8;
 
       const data = await this.reportQuery.getStockReportList(
         user,
         queryMonth,
         queryWarehouse,
+        page,
+        limit,
       );
 
       return res

@@ -22,6 +22,16 @@ import { useGetUserCart } from '@/hooks/useCart';
 import { AuthContext } from '@/context/Auth';
 import { useRouter } from 'next/navigation';
 
+type cartItems = {
+  book_id: number;
+  cart_id: number;
+  id: number;
+  quantity: number;
+  total_price: number;
+  total_weight: number;
+  updated_at: Date;
+  created_at: Date;
+};
 export default function ProductDetailPage({
   params,
 }: {
@@ -30,33 +40,34 @@ export default function ProductDetailPage({
   const router = useRouter();
   const { user } = useContext(AuthContext);
   const { data: carts } = useGetUserCart(user?.id || 0);
-  const cartId = carts?.data.id;
-  const cartItems: any[] = carts?.data.cartId.CartItem || [];
   const bookName = params.slug || '';
   const [simpleDesc, setSimpleDesc] = useState<boolean>(true);
-  const { data } = useProductDetailCustomer(bookName);
-  const bookData: product = data?.data.data || undefined;
+  const { data: books } = useProductDetailCustomer(bookName);
+  const bookData: product = books?.data.data || undefined;
   const bookImage = bookData?.BookImage || [];
   const bookStock = bookData?.current_stock || 0;
   const [mainImage, setMainImage] = useState<string>(bookImage[0]?.book_image);
   const [totalQty, setTotalQty] = useState<number>(0);
   useEffect(() => {
-    if (bookImage?.length > 0) {
-      setMainImage(bookImage[0]?.book_image);
+    if (books?.data?.data?.BookImage && books.data.data.BookImage.length > 0) {
+      setMainImage(books?.data?.data?.BookImage[0]?.book_image);
     }
-  }, [bookImage]);
+  }, [books]);
 
   useEffect(() => {
-    if (cartItems?.length > 0 && bookData) {
-      const item = cartItems.find((el) => bookData?.id === el?.book_id);
+    if (carts && bookData) {
+      const item = carts?.data.cartId.CartItem.find(
+        (el: cartItems) => bookData?.id === el?.book_id,
+      );
       if (item) setTotalQty(item?.quantity);
     }
-  }, [cartItems, bookData]);
+  }, [carts, bookData]);
 
   const handleToggleDesc = () => setSimpleDesc(!simpleDesc);
   const changePreviewImage = (img: string) => {
     setMainImage(img);
   };
+
   const handleSubTotal = (): string => {
     if (totalQty && bookData?.book_price) {
       const price = parseCurrency(totalQty * bookData?.book_price);
@@ -92,6 +103,7 @@ export default function ProductDetailPage({
         <Box>
           <Box width={'403px'}>
             <Image
+              alt="primary book image(s)"
               maxW={'full'}
               h={'270px'}
               objectFit={'contain'}
@@ -108,6 +120,7 @@ export default function ProductDetailPage({
                   key={el?.id}
                 >
                   <Image
+                    alt="book image(s)"
                     maxW={'full'}
                     h={'70px'}
                     objectFit={'fill'}

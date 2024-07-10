@@ -99,6 +99,7 @@ export default function ProductListPage() {
   };
 
   useEffect(() => {
+    console.log('🚀 ~ useEffect ~ debounceSearch:', debounceSearch);
     if (!debounceSearch) {
       queryParams.delete('search');
       replace(`${pathname}?${queryParams.toString()}`, {
@@ -229,7 +230,7 @@ export default function ProductListPage() {
                       alignItems={'center'}
                       px={3}
                     >
-                      Sorry, we couldn't find the book you're looking for.
+                      Sorry, we could not find the book you are looking for.
                     </Flex>
                   </Box>
                 ) : (

@@ -49,7 +49,7 @@ export default function ProductForm() {
     if (slugProduct && isErrFindProduct) {
       throw new Error('Product not found');
     }
-  }, [isErrFindProduct]);
+  }, [isErrFindProduct, slugProduct]);
 
   const productSchema = Yup.object().shape({
     bookName: Yup.string().required('Book name is required'),

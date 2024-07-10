@@ -223,6 +223,10 @@ export class TransactionService {
         const warehouse = await prisma.warehouse.findUnique({
           where: { warehouse_admin_id: userId },
         });
+        console.log(
+          '🚀 ~ TransactionService ~ getAdminTransactions= ~ warehouse:',
+          warehouse.id,
+        );
 
         if (!warehouse) {
           throw new Error('No warehouse assigned to this admin.');

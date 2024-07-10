@@ -23,7 +23,7 @@ export interface FormProps {
 }
 
 export default function LoginPage() {
-  const { useLogin } = useContext(AuthContext);
+  const { useLogin: UseLogin } = useContext(AuthContext);
   const router = useRouter();
   const toast = useToast();
   const loginSchema = Yup.object().shape({
@@ -36,8 +36,8 @@ export default function LoginPage() {
     onSuccess: (data: any) => {
       const token = String(data?.data?.data?.token);
       const userDetail = parseJWT(token);
-      useLogin(userDetail, token);
-      if (userDetail.role === 'user') router.push('/');
+      UseLogin(userDetail, token);
+      if (userDetail.role.toLowerCase() === 'user') router.push('/');
       else router.push('/dashboard');
     },
     onError: (error: AxiosError) => {

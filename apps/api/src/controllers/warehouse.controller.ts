@@ -12,8 +12,9 @@ export class WarehouseController {
     try {
       const { restricted } = req.query;
       const { role, id } = req.user;
+      const restrict = restricted === 'true';
       const data = await this.warehouseService.getAllWarehouseService(
-        Boolean(restricted),
+        restrict,
         role,
         id,
       );

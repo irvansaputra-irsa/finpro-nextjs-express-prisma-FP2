@@ -23,13 +23,18 @@ import { AuthContext } from '@/context/Auth';
 import { useRouter } from 'next/navigation';
 
 const SidebarContent = (props: BoxProps) => {
-  const { useLogout, user } = useContext(AuthContext);
+  const { useLogout: UseLogout, user } = useContext(AuthContext);
   const userRole = user?.role;
   const router = useRouter();
   const integrationsProduct = useDisclosure();
   const integrationsInventory = useDisclosure();
   const integrationsWarehouse = useDisclosure();
   const color = useColorModeValue('gray.600', 'gray.300');
+
+  const logout = () => {
+    UseLogout();
+    router.push('/login');
+  };
 
   type FooProps = {
     icon?: IconType;
@@ -187,13 +192,7 @@ const SidebarContent = (props: BoxProps) => {
           </>
         )}
 
-        <NavItem
-          icon={BiSolidLogOut}
-          onClick={() => {
-            useLogout();
-            router.push('/login');
-          }}
-        >
+        <NavItem icon={BiSolidLogOut} onClick={() => logout()}>
           Logout
         </NavItem>
       </Flex>

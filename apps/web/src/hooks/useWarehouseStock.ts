@@ -5,7 +5,7 @@ export const useGetWarehouseStock = (id: number) => {
   return useQuery({
     queryKey: ['warehouse-stock'],
     queryFn: async () => {
-      const res = await instance.get(`/stock/${id}`);
+      const res = await instance.get(`/stock/${id}?restrict=true`);
       return res;
     },
   });

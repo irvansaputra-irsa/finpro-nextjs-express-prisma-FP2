@@ -99,7 +99,6 @@ export default function ProductListPage() {
   };
 
   useEffect(() => {
-    console.log('🚀 ~ useEffect ~ debounceSearch:', debounceSearch);
     if (!debounceSearch) {
       queryParams.delete('search');
       replace(`${pathname}?${queryParams.toString()}`, {

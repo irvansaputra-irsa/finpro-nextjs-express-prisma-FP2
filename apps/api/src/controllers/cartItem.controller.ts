@@ -34,7 +34,7 @@ export class CartItemController {
 
       res.status(200).json({ returnResult });
     } catch (error) {
-      throw error;
+      next(error);
     }
   };
 }

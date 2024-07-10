@@ -47,9 +47,7 @@ export class TransactionController {
         await this.transactionService.createTransactionService(transactionData);
       res.status(201).json(transaction);
     } catch (error) {
-      res.status(400).json({
-        message: error.message,
-      });
+      next(error);
     }
   };
 
@@ -66,6 +64,7 @@ export class TransactionController {
       res.status(400).json({
         message: error.message,
       });
+      next(error);
     }
   };
 
@@ -85,7 +84,7 @@ export class TransactionController {
         .json({ message: 'Transaction status updated successfully' });
     } catch (error) {
       console.error('Error updating transaction status:', error);
-      res.status(400).json({ message: error.message });
+      next(error);
     }
   };
 
@@ -158,7 +157,7 @@ export class TransactionController {
       res.status(200).json(transactions);
     } catch (error) {
       console.error('Error fetching admin transactions:', error);
-      res.status(500).json({ message: error.message });
+      next(error);
     }
   };
 }

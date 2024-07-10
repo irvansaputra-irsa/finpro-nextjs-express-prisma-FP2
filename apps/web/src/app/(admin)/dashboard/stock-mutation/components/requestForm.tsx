@@ -39,14 +39,23 @@ export default function RequestForm({ userDetail }: props) {
   const { data: warehouseDetailByAdmin } = useFindWarehouseByAdmin(
     Number(userDetail?.id),
   );
-  const warehouseDetail: warehouse = warehouseDetailByAdmin?.data.data || null;
+  // const warehouseDetail: warehouse = warehouseDetailByAdmin?.data.data || null;
   const toast = useToast();
-  const { data: warehouses } = useWarehouse();
-  const listWarehouse: warehouse[] = warehouses?.data.data || []; // list warehouse semuanya dulu
-  const fetchAvailableWarehouseAuth =
-    userDetail?.role === 'admin'
-      ? [...listWarehouse]?.filter((w) => w.id === warehouseDetail?.id)
-      : listWarehouse;
+  const { data: warehouses } = useWarehouse(false);
+  const [fetchAvailableWarehouseAuth, setFetchAvailableWarehouseAuth] =
+    useState<warehouse[]>([]);
+  useEffect(() => {
+    if (warehouses?.data?.data && warehouseDetailByAdmin?.data?.data) {
+      const lists =
+        userDetail?.role.toLowerCase() === 'admin'
+          ? [...warehouses?.data.data]?.filter(
+              (w) => w.id === warehouseDetailByAdmin.data.data.id,
+            )
+          : warehouses?.data.data;
+      setFetchAvailableWarehouseAuth(lists);
+    }
+  }, [warehouses, warehouseDetailByAdmin, userDetail]);
+
   const [selectFrom, setSelectFrom] = useState<string | ''>('');
   const [selectTo, setSelectTo] = useState<string | ''>('');
   const handleSelectFrom = (
@@ -68,11 +77,11 @@ export default function RequestForm({ userDetail }: props) {
   useEffect(() => {
     if (selectFrom) {
       setFilteredList(
-        [...listWarehouse].filter((el) => el.id !== Number(selectFrom)),
+        [...warehouses?.data.data].filter((el) => el.id !== Number(selectFrom)),
       );
       setSelectTo('');
     }
-  }, [selectFrom]);
+  }, [selectFrom, warehouses?.data?.data]);
   const { data: listProducts } = useGetWarehouseStockOnMutationReq(
     Number(selectTo),
   );

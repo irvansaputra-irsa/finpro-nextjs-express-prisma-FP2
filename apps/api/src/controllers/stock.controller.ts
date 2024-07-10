@@ -65,11 +65,14 @@ export class StockController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
+      const { restrict } = req.query;
       const user = req.user;
+      const restricts = restrict === 'true';
       const data =
         await this.stockService.fetchAllProductAtSelectedWarehouseService(
           Number(id),
           user,
+          restricts,
         );
 
       res.status(200).json({

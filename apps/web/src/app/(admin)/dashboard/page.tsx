@@ -5,6 +5,7 @@ import { useProductCategory, useProductsName } from '@/hooks/useProduct';
 import {
   useGetRevenueMonth,
   useGetTopSellingProduct,
+  useReportStock,
   useReportStockOverview,
   useReportTransaction,
 } from '@/hooks/useReport';
@@ -23,8 +24,16 @@ import {
 } from '@/utils/convert';
 import {
   Box,
+  Button,
   Flex,
   Heading,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
   SimpleGrid,
   Stack,
@@ -35,6 +44,7 @@ import {
   Th,
   Thead,
   Tr,
+  useDisclosure,
 } from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
 import {
@@ -71,11 +81,31 @@ type transactionReportList = {
   warehouse_name: string;
   tDate: Date;
 };
+type stockReportList = {
+  id: number;
+  oldStock: number;
+  newStock: number;
+  stockChange: number;
+  type: 'PLUS' | ' MINUS';
+  created_at: Date;
+  message: string;
+  warehouseStock: warehouseStockInfo;
+};
+
+type warehouseStockInfo = {
+  book: {
+    book_name: string;
+  };
+  warehouse: {
+    warehouse_name: string;
+  };
+};
 
 export default function Dashboard() {
   const { user } = useContext(AuthContext);
   const userRole = user?.role;
   const [page, setPage] = useState(1);
+  const [pageSR, setPageSR] = useState(1);
   const [categoryF, setCategoryF] = useState('');
   const [productF, setProductF] = useState('');
   const [warehouseF, setWarehouseF] = useState('');
@@ -114,8 +144,7 @@ export default function Dashboard() {
     { name: 'July', value: revenuePerMonth.julyRevenue?.revenue },
   ];
 
-  const { data: topSelling, isSuccess: isTopSellFetched } =
-    useGetTopSellingProduct(warehouseF);
+  const { data: topSelling } = useGetTopSellingProduct(warehouseF, monthF);
   const listTopSelling: bookTopSell[] = topSelling?.data || [];
 
   const dataTopSell = listTopSelling.map((el) => ({
@@ -170,11 +199,36 @@ export default function Dashboard() {
     }
   };
 
-  //stock report
+  //stock overview
   const { data: stockOverview } = useReportStockOverview(warehouseF, monthF);
   const overviewStockData = stockOverview?.data.data;
   const dataBar = Array(overviewStockData);
+  const limitSR = 8;
+  //stock report list
+  const { data: stocked, isPlaceholderData: placeholderSR } = useReportStock(
+    warehouseF,
+    monthF,
+    pageSR,
+    limitSR,
+  );
+  const stockList: stockReportList[] = stocked?.data.data.report || [];
+  const stockListPages = stocked?.data?.data?.totalPages;
+  //modal see detail stock journal report
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [detailMsg, setDetalMsg] = useState('');
+  const handleSeeDetailMessage = (msg: string) => {
+    setDetalMsg(msg);
+    onOpen();
+  };
 
+  const handlePaginateSR = (type: string): void => {
+    if (type === 'next') {
+      setPageSR((old: number) => old + 1);
+    }
+    if (type === 'prev') {
+      setPageSR((old: number) => Math.max(old - 1, 1));
+    }
+  };
   return (
     <Stack gap={50} p={20}>
       <Flex justifyContent={'space-between'}>
@@ -291,7 +345,7 @@ export default function Dashboard() {
           <Heading size={'xl'} textAlign={'center'} mt={15} mb={25}>
             Top Selling Product
           </Heading>
-          {isTopSellFetched && (
+          {listTopSelling ? (
             <ResponsiveContainer width="100%" height={500}>
               <PieChart width={400} height={400}>
                 <Pie
@@ -318,6 +372,15 @@ export default function Dashboard() {
                 />
               </PieChart>
             </ResponsiveContainer>
+          ) : (
+            <Heading
+              textAlign={'center'}
+              size={'lg'}
+              color={'orange'}
+              bg={'white'}
+            >
+              No data
+            </Heading>
           )}
         </Box>
       </SimpleGrid>
@@ -408,7 +471,77 @@ export default function Dashboard() {
             </BarChart>
           </ResponsiveContainer>
         </Box>
+        <Box mt={10}>
+          <TableContainer>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Book Name</Th>
+                  <Th>Warehouse</Th>
+                  <Th isNumeric>Old stock</Th>
+                  <Th isNumeric>Stock Change</Th>
+                  <Th isNumeric>New Stock</Th>
+                  <Th>Type</Th>
+                  <Th>DateTime</Th>
+                  <Th>Detail</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {stockList.length ? (
+                  stockList?.map((stock) => (
+                    <Tr key={stock.id}>
+                      <Td>{stock.warehouseStock?.book?.book_name}</Td>
+                      <Td>{stock.warehouseStock?.warehouse?.warehouse_name}</Td>
+                      <Td isNumeric>{stock.oldStock}</Td>
+                      <Td isNumeric>{stock.stockChange}</Td>
+                      <Td isNumeric>{stock.newStock}</Td>
+                      <Td color={stock.type === 'PLUS' ? 'green' : 'red'}>
+                        {stock.type === 'PLUS' ? 'Addition' : 'Subtraction'}
+                      </Td>
+                      <Td>{parseDateTime(stock.created_at)}</Td>
+                      <Td>
+                        <Button
+                          variant={'outline'}
+                          colorScheme="orange"
+                          onClick={() => handleSeeDetailMessage(stock?.message)}
+                        >
+                          See detail
+                        </Button>
+                      </Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td textAlign={'center'} colSpan={100}>
+                      No data found
+                    </Td>
+                  </Tr>
+                )}
+              </Tbody>
+            </Table>
+          </TableContainer>
+          <Paginate
+            totalPages={stockListPages}
+            handleClickButton={handlePaginateSR}
+            page={pageSR}
+            isPlaceholderData={placeholderSR}
+          />
+        </Box>
       </Box>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Stock Jurnal Detail Message</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>{detailMsg}</ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="orange" mr={3} onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Stack>
   );
 }

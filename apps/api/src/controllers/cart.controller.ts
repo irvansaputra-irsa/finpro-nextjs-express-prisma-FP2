@@ -23,7 +23,7 @@ export class CartController {
 
       res.status(200).json({ cartId });
     } catch (error) {
-      throw error;
+      next(error);
     }
   };
 
@@ -60,7 +60,7 @@ export class CartController {
         cartId: cart.id,
       });
     } catch (error) {
-      throw error;
+      next(error);
     }
   };
 
@@ -84,7 +84,7 @@ export class CartController {
         message: 'Successfully update book to user cart',
       });
     } catch (error) {
-      throw error;
+      next(error);
     }
   };
 
@@ -101,6 +101,7 @@ export class CartController {
       res.status(400).json({
         message: error.message,
       });
+      next(error);
     }
   };
 }

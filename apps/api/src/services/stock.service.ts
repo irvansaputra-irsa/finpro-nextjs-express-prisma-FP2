@@ -66,11 +66,12 @@ export class StockService {
   public fetchAllProductAtSelectedWarehouseService = async (
     warehouseId: number,
     user: User,
+    restricts: boolean,
   ): Promise<WarehouseStock[]> => {
     try {
       // 1. cek di WAREHOUSE admin tsb atau bukan
       // super admin trabas aja
-      if (user?.role === 'admin') {
+      if (user?.role === 'admin' && restricts) {
         const warehouse = await this.warehouseQuery.findWarehouseByUserQuery(
           user?.id,
         );

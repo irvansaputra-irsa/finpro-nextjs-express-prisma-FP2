@@ -19,12 +19,15 @@ export const useGetRevenueMonth = (
   });
 };
 
-export const useGetTopSellingProduct = (filterWarehouse: string) => {
+export const useGetTopSellingProduct = (
+  filterWarehouse: string,
+  filterMonth: string,
+) => {
   return useQuery({
-    queryKey: ['top-selling-product', { filterWarehouse: filterWarehouse }],
+    queryKey: ['top-selling-product', { filterWarehouse, filterMonth }],
     queryFn: async () => {
       const res = await instance.get(
-        `report/top-selling?_warehouse=${separateStringHyphen(filterWarehouse)}`,
+        `report/top-selling?_warehouse=${separateStringHyphen(filterWarehouse)}&_month=${filterMonth}`,
       );
       return res;
     },
@@ -60,10 +63,28 @@ export const useReportStockOverview = (
   filterMonth: string,
 ) => {
   return useQuery({
-    queryKey: ['stock-report', { filterWarehouse, filterMonth }],
+    queryKey: ['stock-overview', { filterWarehouse, filterMonth }],
     queryFn: async () => {
       const res = await instance.get(
         `report/stock-overview?_warehouse=${separateStringHyphen(filterWarehouse)}&_month=${filterMonth}`,
+      );
+      return res;
+    },
+    placeholderData: keepPreviousData,
+  });
+};
+
+export const useReportStock = (
+  filterWarehouse: string,
+  filterMonth: string,
+  page: number,
+  limit: number,
+) => {
+  return useQuery({
+    queryKey: ['stock-report', { filterWarehouse, filterMonth, page, limit }],
+    queryFn: async () => {
+      const res = await instance.get(
+        `report/stock-list?_warehouse=${separateStringHyphen(filterWarehouse)}&_month=${filterMonth}&_page=${page}&_limit=${limit}`,
       );
       return res;
     },

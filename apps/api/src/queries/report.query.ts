@@ -149,6 +149,7 @@ export class ReportQuery {
   public topSellingProduct = async (
     user: User,
     queryWarehouse: string | null,
+    queryMonth: string | null,
   ) => {
     try {
       let filter = '';
@@ -171,9 +172,12 @@ export class ReportQuery {
         const warehouseId = warehouseAdmin.id;
         filter += `AND t.warehouse_id = ${warehouseId}`;
       }
+      if (queryMonth) {
+        filter += `AND monthname(t.created_at)='${queryMonth}'`;
+      }
 
       const topSalesProduct = await prisma.$queryRawUnsafe(
-        `SELECT b.*, SUM(c.quantity) AS sold FROM cartItem c JOIN  book b on c.book_id = b.id JOIN cart ca on ca.id = c.cart_id JOIN transaction t on t.cart_id = ca.id WHERE t.status = 'completed' OR t.status = 'on delivery' ${filter} GROUP BY c.book_id ORDER BY Sold DESC LIMIT 5;`,
+        `SELECT b.*, SUM(c.quantity) AS sold FROM CartItem c JOIN Book b on c.book_id = b.id JOIN Cart ca on ca.id = c.cart_id JOIN Transaction t on t.cart_id = ca.id WHERE t.status = 'completed' OR t.status = 'on delivery' ${filter} GROUP BY c.book_id ORDER BY Sold DESC LIMIT 5;`,
       );
       return topSalesProduct;
     } catch (error) {
@@ -221,7 +225,7 @@ export class ReportQuery {
         const offset = (page - 1) * limit;
         paginate = `limit ${limit} offset ${offset}`;
       }
-      const query = `select t.id, t.status, t.created_at as tDate, t.payment_method, w.warehouse_name, sum(ci.total_price) as transaction_revenue from transaction t join cart c on c.id = t.cart_id join cartitem ci on ci.cart_id = c.id join warehouse w on t.warehouse_id = w.id join book b on b.id = ci.book_id join bookcategory bc on bc.id = b.book_category_id WHERE (t.status = 'completed' OR t.status = 'on delivery') ${filters ?? ''} group by ci.cart_id order by t.id ASC`;
+      const query = `select t.id, t.status, t.created_at as tDate, t.payment_method, w.warehouse_name, sum(ci.total_price) as transaction_revenue from Transaction t join Cart c on c.id = t.cart_id join CartItem ci on ci.cart_id = c.id join Warehouse w on t.warehouse_id = w.id join Book b on b.id = ci.book_id join BookCategory bc on bc.id = b.book_category_id WHERE (t.status = 'completed' OR t.status = 'on delivery') ${filters ?? ''} group by ci.cart_id order by t.id ASC`;
       const revenueData: [] = await prisma.$queryRawUnsafe(`${query}`);
       const revenuePerTransaction = await prisma.$queryRawUnsafe(
         `${query} ${paginate}`,
@@ -321,8 +325,10 @@ export class ReportQuery {
 
   public getStockReportList = async (
     user: User,
-    queryWarehouse: string | null,
     queryMonth: string | null,
+    queryWarehouse: string | null,
+    page: number | null,
+    limit: number,
   ) => {
     try {
       const date = dateBetween;
@@ -363,14 +369,46 @@ export class ReportQuery {
           },
         };
       }
-
-      const stockReports = await prisma.jurnalStock.findMany({
+      const paginate =
+        page > 0 && limit > 0 ? { take: limit, skip: (page - 1) * limit } : '';
+      const fetchQuery = {
         where: {
           ...filter,
         },
-      });
+        select: {
+          id: true,
+          oldStock: true,
+          newStock: true,
+          stockChange: true,
+          type: true,
+          created_at: true,
+          message: true,
+          warehouseStock: {
+            select: {
+              book: {
+                select: {
+                  book_name: true,
+                },
+              },
+              warehouse: {
+                select: {
+                  warehouse_name: true,
+                },
+              },
+            },
+          },
+        },
+        ...paginate,
+      };
 
-      return stockReports;
+      const [report, counts] = await prisma.$transaction([
+        prisma.jurnalStock.findMany(fetchQuery),
+        prisma.jurnalStock.count({ where: fetchQuery.where }),
+      ]);
+
+      const totalPages = Math.ceil(counts / limit) || 1;
+
+      return { report, totalPages };
     } catch (error) {
       throw error;
     }

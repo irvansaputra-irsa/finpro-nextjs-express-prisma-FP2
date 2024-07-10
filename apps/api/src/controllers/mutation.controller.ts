@@ -39,6 +39,7 @@ export class MutationController {
       next(error);
     }
   };
+
   public rejectMutationController = async (
     req: Request,
     res: Response,

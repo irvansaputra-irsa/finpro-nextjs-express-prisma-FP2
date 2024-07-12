@@ -4,7 +4,6 @@ import { join } from 'path';
 import uniqid from 'uniqid';
 import path = require('path');
 import { FileFilterCallback } from 'multer';
-import { ProductMiddleware } from '@/middlewares/product.middleware';
 
 type DestinationCallback = (error: Error | null, destination: string) => void;
 type FileNameCallback = (error: Error | null, filename: string) => void;

@@ -69,15 +69,16 @@ export const useProductListCustomer = (
 export const useProductListDashboard = (
   page: number,
   limit: number,
-  sort: string = '',
   search: string = '',
-  categoryFilter: string = '',
+  sort: string = '',
+  orderSort: string | null = '',
+  // categoryFilter: string = '',
 ) => {
   return useQuery({
-    queryKey: ['product-list', page, categoryFilter, sort, search],
+    queryKey: ['product-list', page, sort, search, orderSort],
     queryFn: async () => {
       const res = await instance.get(
-        `/product/dashboard?page=${page}&limit=${limit}&category=${categoryFilter}&sort=${sort}&search=${search}`,
+        `/product/dashboard?page=${page}&limit=${limit}&sort=${sort}&order=${orderSort}&search=${search}`,
       );
       return res;
     },

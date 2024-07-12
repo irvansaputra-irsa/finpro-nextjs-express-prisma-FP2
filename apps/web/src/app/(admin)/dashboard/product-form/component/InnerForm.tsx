@@ -29,11 +29,6 @@ import { useProductCategory } from '@/hooks/useProduct';
 import { Field, Form } from 'formik';
 import { MdDeleteForever } from 'react-icons/md';
 import { useProductImageDeleteMutation } from '@/hooks/useProductMutation';
-
-interface OtherProps {
-  additionalProp: productImage[];
-}
-
 interface Preview {
   source: string;
   imageName?: string;
@@ -52,11 +47,6 @@ export default function InnerForm(props: any) {
     setFieldValue,
     additionalProp,
   } = props;
-  // const handleChanges = (e: ChangeEvent<HTMLInputElement>): void => {
-  //   const filter: string = e.target.value.replace(/\D/g, '');
-  //   const newValue: string = filter.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  //   setValue(newValue);
-  // };
   const [preview, setPreview] = useState<Preview[]>([]);
   const { data: categoryData } = useProductCategory();
   const { mutate: mutateDeleteImage } = useProductImageDeleteMutation();
@@ -241,9 +231,9 @@ export default function InnerForm(props: any) {
               </FormLabel>
               <Field
                 as={Textarea}
-                placeholder="write it here..."
+                placeholder="summarize book here..."
                 mt={1}
-                rows={3}
+                rows={7}
                 shadow="sm"
                 focusBorderColor="brand.400"
                 fontSize={{
@@ -456,7 +446,7 @@ export default function InnerForm(props: any) {
                         <Box border={idx + 1 === 1 ? 'red solid 4px' : ''}>
                           <Image
                             w={'240px'}
-                            h={'135px'}
+                            h={'215px'}
                             src={el?.source}
                             alt="book image(s)"
                           />
@@ -520,7 +510,16 @@ export default function InnerForm(props: any) {
                       },
                     }}
                   >
-                    <Text>Upload a file</Text>
+                    <Box>
+                      <Text
+                        display={'inline-block'}
+                        fontWeight={'bold'}
+                        color={'orange'}
+                      >
+                        Upload
+                      </Text>{' '}
+                      a file
+                    </Box>
                     <VisuallyHidden>
                       <input
                         id="file"
@@ -565,7 +564,7 @@ export default function InnerForm(props: any) {
         >
           <Button
             type="submit"
-            color="black"
+            colorScheme="orange"
             _focus={{
               shadow: '',
             }}

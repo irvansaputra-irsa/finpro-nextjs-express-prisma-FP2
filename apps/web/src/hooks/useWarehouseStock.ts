@@ -1,5 +1,5 @@
 import instance from '@/utils/axiosInstance';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 export const useGetWarehouseStock = (id: number) => {
   return useQuery({
@@ -23,12 +23,20 @@ export const useGetWarehouseStockOnMutationReq = (id: number) => {
   return { data: stockList.data };
 };
 
-export const useGetAnotherProductOnWarehouse = (id: number) => {
+export const useGetAnotherProductOnWarehouse = (
+  id: number,
+  page: number,
+  search: string,
+) => {
+  const limit = 8;
   return useQuery({
-    queryKey: ['list-warehouse-product'],
+    queryKey: ['list-warehouse-product', { page, limit, search }],
     queryFn: async () => {
-      const res = await instance.get(`/stock/new/${id}`);
+      const res = await instance.get(
+        `/stock/new/${id}?_page=${page}&_limit=${limit}&_search=${search}`,
+      );
       return res;
     },
+    placeholderData: keepPreviousData,
   });
 };

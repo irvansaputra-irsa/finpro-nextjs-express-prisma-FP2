@@ -1,15 +1,23 @@
 'use client';
-import { Box, Divider, GridItem, Heading, SimpleGrid } from '@chakra-ui/react';
+import {
+  Box,
+  Divider,
+  Flex,
+  GridItem,
+  Heading,
+  SimpleGrid,
+} from '@chakra-ui/react';
 import { withFormik } from 'formik';
-
+import * as Yup from 'yup';
 import InnerForm from './component/InnerForm';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   useCategoryMutation,
   useCategoryProductUpdateMutation,
 } from '@/hooks/useProductMutation';
 import { useProductCategoryDetail } from '@/hooks/useProduct';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { ArrowBackIcon } from '@chakra-ui/icons';
 
 export interface FormValues {
   bookCategoryName: string;
@@ -30,19 +38,30 @@ export default function ProductCategoryForm() {
 
   const categoryData = data?.data?.data || '';
 
+  const persistFormValues = useRef({ bookCategoryName: '' });
+
   useEffect(() => {
     if (slugProduct && isErrFindProduct) {
       throw new Error('Category not found');
     }
   }, [isErrFindProduct, slugProduct]);
 
+  const categorySchema = Yup.object().shape({
+    bookCategoryName: Yup.string().required('Book category name is required'),
+  });
+
   const CategoryForm = withFormik<FormProps, FormValues>({
     mapPropsToValues: (props) => ({
       bookCategoryName:
-        categoryData.book_category_name || props.initialBookCategoryName || '',
+        persistFormValues.current.bookCategoryName ||
+        categoryData.book_category_name ||
+        props.initialBookCategoryName ||
+        '',
     }),
     enableReinitialize: true,
+    validationSchema: categorySchema,
     handleSubmit: ({ bookCategoryName }) => {
+      persistFormValues.current.bookCategoryName = bookCategoryName;
       if (slugProduct) {
         updateCategory({
           bookCategoryId: Number(slugProduct),
@@ -51,6 +70,7 @@ export default function ProductCategoryForm() {
       } else createCategory({ bookCategoryName });
     },
   })(InnerForm);
+  const { back } = useRouter();
   return (
     <Box
       bg="#edf3f8"
@@ -59,9 +79,17 @@ export default function ProductCategoryForm() {
       }}
       p={10}
     >
-      <Heading size={'2xl'}>
-        {slugProduct ? 'Update Category' : 'Create New Category'}
-      </Heading>
+      <Flex gap={5} alignItems={'center'}>
+        <ArrowBackIcon
+          boxSize={'40px'}
+          my={5}
+          cursor={'pointer'}
+          onClick={() => back()}
+        />
+        <Heading size={'2xl'} color={'orange'}>
+          {slugProduct ? 'Update Category' : 'Create New Category'}
+        </Heading>
+      </Flex>
       <Divider
         my="5"
         borderColor="gray.300"
@@ -73,7 +101,7 @@ export default function ProductCategoryForm() {
           sm: 'visible',
         }}
       />
-      <Box>
+      <Box w={{ '2xl': '50%' }}>
         <SimpleGrid
           display={{
             base: 'initial',

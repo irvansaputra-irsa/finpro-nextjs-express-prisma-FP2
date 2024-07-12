@@ -39,7 +39,7 @@ export default function InnerForm(props: FormikProps<FormValues>) {
             <FormLabel
               htmlFor="category-name"
               fontSize="sm"
-              fontWeight="md"
+              fontWeight={'bold'}
               color="gray.700"
               _dark={{
                 color: 'gray.50',
@@ -64,7 +64,9 @@ export default function InnerForm(props: FormikProps<FormValues>) {
                 onChange={handleChange}
               />
             </InputGroup>
-            <FormErrorMessage>{errors.bookCategoryName}</FormErrorMessage>
+            <FormErrorMessage px={3}>
+              {errors.bookCategoryName}
+            </FormErrorMessage>
           </FormControl>
         </SimpleGrid>
       </Stack>
@@ -82,7 +84,7 @@ export default function InnerForm(props: FormikProps<FormValues>) {
       >
         <Button
           type="submit"
-          color="black"
+          colorScheme="orange"
           _focus={{
             shadow: '',
           }}

@@ -39,7 +39,7 @@ export default function ProductListPage() {
   const [sort, setSort] = useState<string>(sortQuery);
   const [search, setSearch] = useState<string>(searchQuery);
   const [categoryFilter, setCategoryFilter] = useState<string>(categoryQuery);
-  const [debounceSearch] = useDebounce(search.trim(), 1000);
+  const [debounceSearch] = useDebounce(search.trim(), 800);
   const limit = 12;
   const { data, isPlaceholderData } = useProductListCustomer(
     page,
@@ -90,13 +90,17 @@ export default function ProductListPage() {
   const handleClickButton = (type: string): void => {
     if (type === 'next') {
       setPage((old: number) => old + 1);
-      setQueryUrl('page', (page - 1).toString());
     }
     if (type === 'prev') {
       setPage((old: number) => Math.max(old - 1, 1));
-      setQueryUrl('page', (page + 1).toString());
     }
   };
+
+  useEffect(() => {
+    if (page) {
+      setQueryUrl('page', page.toString());
+    }
+  }, [page]);
 
   useEffect(() => {
     if (!debounceSearch) {
@@ -213,7 +217,7 @@ export default function ProductListPage() {
                   <Select
                     width={'200px'}
                     mt={3}
-                    placeholder="Sort by"
+                    placeholder="Default"
                     onChange={(e) => handleSort(e)}
                   >
                     <option value={'newest'}>Newest</option>

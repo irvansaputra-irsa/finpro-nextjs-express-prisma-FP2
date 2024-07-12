@@ -49,7 +49,7 @@ export default function TableOutcoming({ outcomingMutation }: props) {
         ) : (
           <Tr>
             <Td colSpan={5} textAlign={'center'}>
-              No data available
+              No data found
             </Td>
           </Tr>
         )}

@@ -16,8 +16,8 @@ import {
   Th,
   Td,
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '@/context/Auth';
 
 interface Transaction {
   id: number;
@@ -28,6 +28,7 @@ interface Transaction {
 }
 
 const TransactionHistoryPage = () => {
+  const { user } = useContext(AuthContext);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
@@ -36,15 +37,15 @@ const TransactionHistoryPage = () => {
   const toast = useToast();
 
   useEffect(() => {
-    fetchTransactions();
-  }, [page, searchDate]);
+    if (user) fetchTransactions();
+  }, [user, page, searchDate]);
 
   const fetchTransactions = async () => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_API_URL}/transaction/fetch`,
         {
-          userId: 1,
+          userId: user?.id,
           searchDate,
         },
       );

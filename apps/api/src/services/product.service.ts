@@ -1,5 +1,7 @@
+import { HttpException } from '@/exceptions/http.exception';
 import { product } from '@/interfaces/product.interface';
 import { ProductQuery } from '@/queries/product.query';
+import { User } from '@/types/express';
 import { deleteHypeninString } from '@/utils/convert.utils';
 import { Book } from '@prisma/client';
 import Container, { Service } from 'typedi';
@@ -10,18 +12,24 @@ export class ProductService {
   public createProductService = async (
     params: product,
     files: Express.Multer.File[],
+    user: User,
   ) => {
     try {
+      if (user?.role.toLowerCase() !== 'super admin') {
+        throw new HttpException(403, 'Unauthorized');
+      }
       const data = await this.productQuery.createProductQuery(params, files);
-
       return data;
     } catch (error) {
       throw error;
     }
   };
 
-  public deleteProductService = async (id: number) => {
+  public deleteProductService = async (id: number, user: User) => {
     try {
+      if (user?.role.toLowerCase() !== 'super admin') {
+        throw new HttpException(403, 'Unauthorized');
+      }
       const check = await this.productQuery.checkProduct('id', id);
       if (!check) throw new Error('Product is not exist');
 
@@ -69,8 +77,12 @@ export class ProductService {
   public updateProductService = async (
     param: Book,
     files: Express.Multer.File[],
+    user: User,
   ) => {
     try {
+      if (user?.role.toLowerCase() !== 'super admin') {
+        throw new HttpException(403, 'Unauthorized');
+      }
       const data = await this.productQuery.updateProductQuery(param, files);
       return data;
     } catch (error) {
@@ -93,6 +105,7 @@ export class ProductService {
     category: string,
     sortBy: string,
     search: string,
+    order: string,
   ) => {
     try {
       if (category.includes('-')) {
@@ -104,6 +117,7 @@ export class ProductService {
         category,
         sortBy,
         search,
+        order,
       );
       return data;
     } catch (error) {

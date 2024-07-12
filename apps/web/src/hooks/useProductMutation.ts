@@ -199,9 +199,12 @@ export const useCategoryMutation = () => {
     onError: (err) => {
       if (axios.isAxiosError(err)) {
         const res = err.response?.data as errorResponse;
+        let message = res?.message;
+        if (res?.message.toLowerCase().includes('unique constraint'))
+          message = 'Book Category already exist, please input another one!';
         toast({
           title: 'Failed to create',
-          description: res.message || 'An error occurred while submitting.',
+          description: message || 'An error occurred while submitting.',
           status: 'error',
           duration: 9000,
           isClosable: true,
@@ -239,9 +242,12 @@ export const useCategoryProductUpdateMutation = () => {
     onError: (err) => {
       if (axios.isAxiosError(err)) {
         const res = err.response?.data as errorResponse;
+        let message = res?.message;
+        if (res?.message.toLowerCase().includes('unique constraint'))
+          message = 'Book Category already exist, please input another one!';
         toast({
           title: 'Failed to update',
-          description: res.message || 'An error occurred while submitting.',
+          description: message || 'An error occurred while submitting.',
           status: 'error',
           duration: 9000,
           isClosable: true,

@@ -30,6 +30,7 @@ export class TransactionRouter {
       this.transactionController.cancelTransactionOrder,
     );
     this.router.post('/send', this.transactionController.sendTransactionOrder);
+    this.router.post('/cron', this.transactionController.cronUpdateStatus);
   }
 
   getRouter(): Router {

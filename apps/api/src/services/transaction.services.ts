@@ -39,10 +39,28 @@ export class TransactionService {
     status: string,
   ): Promise<void> => {
     try {
-      await prisma.transaction.update({
-        where: { id: transactionId },
-        data: { status },
-      });
+      if (status === 'on delivery') {
+        await prisma.transaction.update({
+          where: { id: transactionId },
+          data: {
+            status,
+            confirmation_date: new Date(),
+          },
+        });
+      } else {
+        await prisma.transaction.update({
+          where: { id: transactionId },
+          data: { status },
+        });
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public cronUpdateStatus = async () => {
+    try {
+      await this.transactionQuery.cronUpdateStatus();
     } catch (error) {
       throw error;
     }
@@ -143,6 +161,7 @@ export class TransactionService {
             selectedWarehouse,
           );
           await this.updateTransactionStatus(transactionId, 'on delivery');
+          // disini
           return order;
         } catch (error) {
           throw error;

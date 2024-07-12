@@ -19,7 +19,6 @@ export class TransactionController {
     try {
       const userId = parseInt(req.body.userId as string, 10);
       const searchDate = req.body.searchDate as string;
-      console.log('======== SEARCH DATE =========', searchDate);
 
       if (isNaN(userId)) {
         throw new Error('Invalid userId');
@@ -84,6 +83,19 @@ export class TransactionController {
         .json({ message: 'Transaction status updated successfully' });
     } catch (error) {
       console.error('Error updating transaction status:', error);
+      next(error);
+    }
+  };
+
+  public cronUpdateStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      await this.transactionService.cronUpdateStatus();
+    } catch (error) {
+      console.error('Error', error);
       next(error);
     }
   };

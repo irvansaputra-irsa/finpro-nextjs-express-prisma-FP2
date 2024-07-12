@@ -54,6 +54,44 @@ export class TransactionQuery {
     }
   };
 
+  public cronUpdateStatus = async () => {
+    //get time from device
+    const currentTime = new Date();
+    const timeTreshold = new Date(currentTime.getTime() - 2 * 60 * 1000);
+    /**
+     * convert timeTreshold from UTC+n to UTC+0
+     * karena di frontend, kita dapatnya dari timezone device client
+     * getTimezoneOffset kalau return -60 berarti UTC+01
+     * getTimezoneOffset kalau return -600 berarti UTC+10
+     */
+    // const offset = timeTreshold.getTimezoneOffset();
+    // console.log(offset);
+    // console.log(`time treshold before: `, timeTreshold);
+    // var hourDiff = offset / 60;
+    // timeTreshold.setHours(timeTreshold.getHours() + hourDiff);
+    console.log(timeTreshold);
+
+    try {
+      const updateOrders = await prisma.transaction.updateMany({
+        where: {
+          confirmation_date: {
+            lt: timeTreshold,
+          },
+          status: 'on delivery',
+        },
+        data: {
+          status: 'completed',
+        },
+      });
+
+      console.log(
+        `Successfully updated ${updateOrders.count} records with cron`,
+      );
+    } catch (error) {
+      console.error('encounter error while updating order status');
+    }
+  };
+
   public getUserTransactions = async (params: GetTransactionsParams) => {
     const { userId, searchDate } = params;
     console.log('search date', searchDate);
@@ -70,11 +108,17 @@ export class TransactionQuery {
     };
 
     if (searchDate) {
+      const startDate = new Date(searchDate);
+      const endDate = new Date(
+        new Date(searchDate).setDate(new Date(searchDate).getDate() + 1),
+      );
+
+      // Set from UTC + 7 to UTC + 0
+      startDate.setHours(startDate.getHours() - 7);
+      endDate.setHours(endDate.getHours() - 7);
       whereClause.created_at = {
-        gte: new Date(searchDate),
-        lt: new Date(
-          new Date(searchDate).setDate(new Date(searchDate).getDate() + 1),
-        ),
+        gte: startDate,
+        lt: endDate,
       };
     }
 

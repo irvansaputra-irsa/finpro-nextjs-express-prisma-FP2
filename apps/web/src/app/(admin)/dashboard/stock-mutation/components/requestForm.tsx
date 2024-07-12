@@ -21,6 +21,7 @@ import {
   Input,
   Select,
   SimpleGrid,
+  Text,
   Textarea,
   useToast,
 } from '@chakra-ui/react';
@@ -31,6 +32,7 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 type ProductOption = {
   value: string;
   label: string;
+  stock: number;
 };
 type props = {
   userDetail: IUser | null;
@@ -39,16 +41,16 @@ export default function RequestForm({ userDetail }: props) {
   const { data: warehouseDetailByAdmin } = useFindWarehouseByAdmin(
     Number(userDetail?.id),
   );
-  // const warehouseDetail: warehouse = warehouseDetailByAdmin?.data.data || null;
   const toast = useToast();
   const { data: warehouses } = useWarehouse(false);
   const [fetchAvailableWarehouseAuth, setFetchAvailableWarehouseAuth] =
     useState<warehouse[]>([]);
   useEffect(() => {
-    if (warehouses?.data?.data && warehouseDetailByAdmin?.data?.data) {
+    if (warehouses?.data?.data) {
       const lists =
         userDetail?.role.toLowerCase() === 'admin'
-          ? [...warehouses?.data.data]?.filter(
+          ? warehouseDetailByAdmin?.data.data &&
+            [...warehouses?.data.data]?.filter(
               (w) => w.id === warehouseDetailByAdmin.data.data.id,
             )
           : warehouses?.data.data;
@@ -91,12 +93,15 @@ export default function RequestForm({ userDetail }: props) {
     mapListProductAvailable = listProductsAvailable.map((product) => ({
       ['label']: product.book.book_name,
       ['value']: product.book_id.toString(),
+      ['stock']: product.stockQty,
     }));
   }
 
   const [selectProduct, setSelectProduct] = useState<string>('');
+  const [remainingStock, setRemainingStock] = useState(0);
   const handleSelectProduct = (selected: SingleValue<ProductOption>) => {
     if (selected) {
+      setRemainingStock(selected.stock);
       setSelectProduct(selected.value);
     }
   };
@@ -172,7 +177,7 @@ export default function RequestForm({ userDetail }: props) {
                 onChange={(e) => handleSelectFrom(e, 'from')}
                 value={selectFrom}
               >
-                {fetchAvailableWarehouseAuth.length &&
+                {fetchAvailableWarehouseAuth?.length &&
                   fetchAvailableWarehouseAuth?.map((el) => (
                     <option value={el.id} key={el.id}>
                       {el.warehouse_name} - {el.warehouse_city}
@@ -206,7 +211,10 @@ export default function RequestForm({ userDetail }: props) {
           >
             <GridItem colSpan={{ base: 12, '2xl': 5 }} mr={{ xl: 5 }}>
               <FormControl isRequired>
-                <FormLabel>Book Name</FormLabel>
+                <FormLabel display={'inline-block'}>Book Name</FormLabel>{' '}
+                <span>
+                  {selectProduct && `Remaining Stock: ${remainingStock}`}
+                </span>
                 <AsyncSelect
                   ref={prSelectRef}
                   onChange={(selected) => handleSelectProduct(selected)}
@@ -233,7 +241,7 @@ export default function RequestForm({ userDetail }: props) {
                   }}
                 ></AsyncSelect>
                 <FormHelperText color={'gray.500'}>
-                  Notes: Book must be available at warehouse destination
+                  Note: Book must be available at warehouse destination
                 </FormHelperText>
               </FormControl>
             </GridItem>

@@ -345,7 +345,7 @@ export default function Dashboard() {
           <Heading size={'xl'} textAlign={'center'} mt={15} mb={25}>
             Top Selling Product
           </Heading>
-          {listTopSelling ? (
+          {listTopSelling.length ? (
             <ResponsiveContainer width="100%" height={500}>
               <PieChart width={400} height={400}>
                 <Pie

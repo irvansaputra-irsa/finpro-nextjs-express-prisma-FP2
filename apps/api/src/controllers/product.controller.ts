@@ -14,10 +14,12 @@ export class ProductController {
       const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
       };
+      const user = req.user;
       if (Array.isArray(files)) {
         const data = await this.productService.createProductService(
           params,
           files,
+          user,
         );
         res.status(201).json({
           message: 'Create New Product Success',
@@ -38,7 +40,11 @@ export class ProductController {
   ) => {
     try {
       const { id } = req.params;
-      const data = await this.productService.deleteProductService(Number(id));
+      const user = req.user;
+      const data = await this.productService.deleteProductService(
+        Number(id),
+        user,
+      );
       res.status(200).json({
         message: 'Delete Product Success',
         data,
@@ -102,6 +108,7 @@ export class ProductController {
   ) => {
     try {
       const param = req.body;
+      const user = req.user;
       const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
       };
@@ -109,6 +116,7 @@ export class ProductController {
         const data = await this.productService.updateProductService(
           param,
           files,
+          user,
         );
         res.status(200).json({
           message: 'Update Product Detail Success',
@@ -147,19 +155,21 @@ export class ProductController {
     next: NextFunction,
   ) => {
     try {
-      const { page, limit, category, sort, search } = req.query;
+      const { page, limit, category, sort, search, order } = req.query;
       let data = {};
       const pages = Number(page) || undefined;
       const limits = Number(limit) || undefined;
       const categories = category?.toString() || '';
       const sortBy = sort?.toString() || '';
       const searchs = search?.toString() || '';
+      const orders = order?.toString() || '';
       data = await this.productService.getAllProductsDashboardService(
         pages,
         limits,
         categories,
         sortBy,
         searchs,
+        orders,
       );
 
       res.status(200).json({

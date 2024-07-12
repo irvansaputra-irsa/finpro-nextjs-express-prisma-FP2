@@ -1,3 +1,5 @@
+import { IUser } from '@/context/Auth';
+
 const displayStatusIndicator = (
   type: 'PROCESSED' | 'COMPLETED' | 'REJECTED' | 'CANCELED',
 ) => {
@@ -13,4 +15,11 @@ const displayStatusIndicator = (
   return '#FFC94A';
 };
 
-export { displayStatusIndicator };
+const checkSuperAdmin = (user: IUser | null) => {
+  if (user) {
+    return user?.role.toLowerCase() === 'super admin';
+  }
+  return false;
+};
+
+export { displayStatusIndicator, checkSuperAdmin };

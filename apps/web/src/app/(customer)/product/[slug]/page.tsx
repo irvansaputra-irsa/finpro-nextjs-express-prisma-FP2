@@ -44,6 +44,7 @@ export default function ProductDetailPage({
   const [simpleDesc, setSimpleDesc] = useState<boolean>(true);
   const { data: books } = useProductDetailCustomer(bookName);
   const bookData: product = books?.data.data || undefined;
+  console.log('🚀 ~ bookData:', bookData);
   const bookImage = bookData?.BookImage || [];
   const bookStock = bookData?.current_stock || 0;
   const [mainImage, setMainImage] = useState<string>(bookImage[0]?.book_image);
@@ -55,8 +56,8 @@ export default function ProductDetailPage({
   }, [books]);
 
   useEffect(() => {
-    if (carts && bookData) {
-      const item = carts?.data.cartId.CartItem.find(
+    if (carts?.data?.cartId?.CartItem && bookData) {
+      const item = carts?.data?.cartId?.CartItem?.find(
         (el: cartItems) => bookData?.id === el?.book_id,
       );
       if (item) setTotalQty(item?.quantity);
@@ -74,6 +75,18 @@ export default function ProductDetailPage({
       return price;
     }
     return '0';
+  };
+
+  const convertEscapeParagraph = (paragraphs: string) => {
+    if (paragraphs) {
+      return (
+        <div
+          dangerouslySetInnerHTML={{
+            __html: paragraphs.replace(/\n/g, '<br/>'),
+          }}
+        />
+      );
+    }
   };
 
   const { mutate: addToCart } = useAddProductCartMutation();
@@ -97,12 +110,13 @@ export default function ProductDetailPage({
     >
       <Flex
         gap={10}
-        alignItems={'center'}
+        alignItems={{ base: 'center', lg: 'start' }}
         direction={{ base: 'column', lg: 'row' }}
       >
         <Box>
-          <Box width={'403px'}>
+          <Box width={'403px'} bgColor={'#FBF6E2'} py={5}>
             <Image
+              mx="auto"
               alt="primary book image(s)"
               maxW={'full'}
               h={'270px'}
@@ -144,7 +158,7 @@ export default function ProductDetailPage({
               Book Description
             </Heading>
             <Text textAlign={'justify'} noOfLines={simpleDesc ? 4 : undefined}>
-              {bookData?.book_description}
+              {convertEscapeParagraph(bookData?.book_description)}
             </Text>
             <Flex justifyContent={'end'} cursor={'pointer'}>
               {simpleDesc ? (

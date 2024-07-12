@@ -39,7 +39,7 @@ export default function ProductCard({ products }: props) {
             <Img
               h={48}
               w="250px"
-              objectFit="cover"
+              objectFit="contain"
               mt={2}
               src={returnImgURl(el.primary_image)}
               alt="product img"

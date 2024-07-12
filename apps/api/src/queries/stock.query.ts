@@ -7,10 +7,17 @@ import {
   warehouseStock,
 } from '@/interfaces/stock.interface';
 import prisma from '@/prisma';
-import { Book, CartItem, Warehouse, WarehouseStock } from '@prisma/client';
+import {
+  Book,
+  CartItem,
+  Prisma,
+  Warehouse,
+  WarehouseStock,
+} from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { JurnalQuery } from './jurnal.query';
 import { HttpException } from '@/exceptions/http.exception';
+import { IfetchProductNotAddedYet } from '@/interfaces/warehouseStock.interface';
 
 @Service()
 export class StockQuery {
@@ -212,21 +219,49 @@ export class StockQuery {
 
   public fetchProductNotAddedYetQuery = async (
     warehouseId: number,
-  ): Promise<Book[]> => {
+    page: number,
+    limit: number,
+    search: string,
+  ): Promise<IfetchProductNotAddedYet> => {
     try {
-      const productList = await prisma.book.findMany({
+      let query: Prisma.BookFindManyArgs = {
         where: {
-          WarehouseStock: {
-            none: {
-              warehouse_id: warehouseId,
+          AND: [
+            {
+              WarehouseStock: {
+                none: {
+                  warehouse_id: warehouseId,
+                },
+              },
             },
-          },
+            search
+              ? {
+                  book_name: {
+                    contains: search,
+                  },
+                }
+              : {},
+          ],
         },
         include: {
           bookCategory: true,
         },
-      });
-      return productList;
+        orderBy: {
+          created_at: 'desc',
+        },
+      };
+      if (page && limit) {
+        query = { ...query, skip: (page - 1) * limit, take: limit };
+      }
+      // const productList = await prisma.book.findMany(query);
+
+      const [products, count] = await prisma.$transaction([
+        prisma.book.findMany(query),
+        prisma.book.count({ where: query.where }),
+      ]);
+      const totalPage = Math.ceil(count / limit);
+
+      return { products, totalPage };
     } catch (error) {
       throw error;
     }

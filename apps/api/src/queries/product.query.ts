@@ -345,25 +345,19 @@ export class ProductQuery {
     category: string,
     sortBy: string,
     search: string,
+    order: string,
   ) => {
     try {
-      let sortOrder = [];
-      if (sortBy === 'newest') {
-        sortOrder.push({
-          created_at: 'desc',
-        });
-      } else if (sortBy === 'highest') {
-        sortOrder.push({
-          book_price: 'desc',
-        });
-      } else if (sortBy === 'lowest') {
-        sortOrder.push({
-          book_price: 'asc',
-        });
-      }
       const totalDataInDatabase = await prisma.book.count();
       const skipPage = (page - 1) * limit || 0;
       const take = limit ?? totalDataInDatabase;
+
+      let sortQuery: Prisma.BookOrderByWithRelationInput = {};
+      if (sortBy && order !== 'UNSORT') {
+        sortQuery = {
+          [sortBy]: order === 'ASC' ? 'asc' : 'desc',
+        };
+      }
 
       const query = {
         skip: skipPage,
@@ -403,7 +397,7 @@ export class ProductQuery {
             },
           ],
         },
-        orderBy: sortOrder,
+        orderBy: sortQuery,
       } satisfies Prisma.BookFindManyArgs;
 
       const [books, count] = await prisma.$transaction([

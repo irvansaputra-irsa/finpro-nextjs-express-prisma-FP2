@@ -1,8 +1,15 @@
 'use client';
 import * as Yup from 'yup';
-import { Box, Divider, GridItem, Heading, SimpleGrid } from '@chakra-ui/react';
+import {
+  Box,
+  Divider,
+  Flex,
+  GridItem,
+  Heading,
+  SimpleGrid,
+} from '@chakra-ui/react';
 import { withFormik } from 'formik';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import InnerForm from './component/InnerForm';
 import {
   useProductMutation,
@@ -11,6 +18,8 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { useProductForm } from '@/hooks/useProduct';
 import { product, productImage } from '@/interface/product.interface';
+import { ArrowBackIcon } from '@chakra-ui/icons';
+import { useRouter } from 'next/navigation';
 export interface FormValues {
   bookName: string;
   bookDescription: string;
@@ -21,7 +30,7 @@ export interface FormValues {
   bookISBN: string;
   bookPrice: number;
   bookWeight: number;
-  file?: File[];
+  file: File[];
 }
 
 export interface FormProps {
@@ -34,7 +43,7 @@ export interface FormProps {
   initialBookISBN?: string;
   initialBookPrice?: number;
   initialBookWeight?: number;
-  initialFile?: File[];
+  initialFile?: [];
   additionalProp?: productImage[];
 }
 export default function ProductForm() {
@@ -45,12 +54,26 @@ export default function ProductForm() {
   const { data: book, isError: isErrFindProduct } = useProductForm(slugProduct);
   const bookData: product = book?.data.data;
 
+  //persist form data after submit
+  const persistFormValues = useRef({
+    bookName: '',
+    bookDescription: '',
+    bookAuthor: '',
+    bookPublisher: '',
+    bookPublishedYear: 0,
+    bookCategoryId: 0,
+    bookISBN: '',
+    bookPrice: 0,
+    bookWeight: 0,
+  });
+
   useEffect(() => {
     if (slugProduct && isErrFindProduct) {
       throw new Error('Product not found');
     }
   }, [isErrFindProduct, slugProduct]);
 
+  const thisYear = new Date().getFullYear();
   const productSchema = Yup.object().shape({
     bookName: Yup.string().required('Book name is required'),
     bookDescription: Yup.string().required('Book Description is required'),
@@ -58,7 +81,8 @@ export default function ProductForm() {
     bookPublisher: Yup.string().required('Publisher name is required'),
     bookPublishedYear: Yup.number()
       .positive('Please input valid year')
-      .required('Book published year is required'),
+      .required('Book published year is required')
+      .max(thisYear, 'Invalid year, please input the correct one'),
     bookCategoryId: Yup.number()
       .min(1, 'Please choose the category')
       .required('Please choose the category'),
@@ -108,19 +132,51 @@ export default function ProductForm() {
 
   const ProductForm = withFormik<FormProps, FormValues>({
     mapPropsToValues: (props) => ({
-      bookName: bookData?.book_name || props.initialBookName || '',
+      bookName:
+        persistFormValues.current.bookName ||
+        bookData?.book_name ||
+        props.initialBookName ||
+        '',
       bookDescription:
-        bookData?.book_description || props.initialBookDescription || '',
-      bookAuthor: bookData?.book_author || props.initialBookAuthor || '',
+        persistFormValues.current.bookDescription ||
+        bookData?.book_description ||
+        props.initialBookDescription ||
+        '',
+      bookAuthor:
+        persistFormValues.current.bookAuthor ||
+        bookData?.book_author ||
+        props.initialBookAuthor ||
+        '',
       bookPublisher:
-        bookData?.book_publisher || props.initialBookPublisher || '',
+        persistFormValues.current.bookPublisher ||
+        bookData?.book_publisher ||
+        props.initialBookPublisher ||
+        '',
       bookPublishedYear:
-        bookData?.book_published_year || props.initialBookPublishedYear || 0,
+        persistFormValues.current.bookPublishedYear ||
+        bookData?.book_published_year ||
+        props.initialBookPublishedYear ||
+        0,
       bookCategoryId:
-        bookData?.book_category_id || props.initialBookCategoryId || 0,
-      bookISBN: bookData?.book_ISBN || props.initialBookISBN || '',
-      bookPrice: bookData?.book_price || props.initialBookPrice || 0,
-      bookWeight: bookData?.book_weight || props.initialBookWeight || 0,
+        persistFormValues.current.bookCategoryId ||
+        bookData?.book_category_id ||
+        props.initialBookCategoryId ||
+        0,
+      bookISBN:
+        persistFormValues.current.bookISBN ||
+        bookData?.book_ISBN ||
+        props.initialBookISBN ||
+        '',
+      bookPrice:
+        persistFormValues.current.bookPrice ||
+        bookData?.book_price ||
+        props.initialBookPrice ||
+        0,
+      bookWeight:
+        persistFormValues.current.bookWeight ||
+        bookData?.book_weight ||
+        props.initialBookWeight ||
+        0,
       file: props.initialFile || [],
     }),
     validationSchema: productSchema,
@@ -138,6 +194,8 @@ export default function ProductForm() {
       bookWeight,
       file,
     }) {
+      //filter non-ascii character
+      bookName = bookName.replace(/[^\x00-\x7F]/g, '');
       submitData({
         bookName,
         bookDescription,
@@ -165,6 +223,16 @@ export default function ProductForm() {
     bookWeight,
     file,
   }: FormValues) => {
+    persistFormValues.current.bookAuthor = bookAuthor;
+    persistFormValues.current.bookCategoryId = bookCategoryId;
+    persistFormValues.current.bookDescription = bookDescription;
+    persistFormValues.current.bookISBN = bookISBN;
+    persistFormValues.current.bookName = bookName;
+    persistFormValues.current.bookPrice = bookPrice;
+    persistFormValues.current.bookPublishedYear = bookPublishedYear;
+    persistFormValues.current.bookPublisher = bookPublisher;
+    persistFormValues.current.bookWeight = bookWeight;
+
     const form = new FormData();
     form.set('book_name', bookName);
     form.set('book_description', bookDescription);
@@ -180,7 +248,6 @@ export default function ProductForm() {
         form.append('files', el);
       });
     }
-
     if (slugProduct) {
       form.set('id', bookData?.id?.toString());
       updateProduct(form);
@@ -188,7 +255,7 @@ export default function ProductForm() {
       createProduct(form);
     }
   };
-
+  const { back } = useRouter();
   return (
     <Box
       bg="#edf3f8"
@@ -197,9 +264,17 @@ export default function ProductForm() {
       }}
       p={10}
     >
-      <Heading size={'2xl'}>
-        {slugProduct ? 'Update Product' : 'Create Product'}
-      </Heading>
+      <Flex gap={5} alignItems={'center'}>
+        <ArrowBackIcon
+          boxSize={'40px'}
+          my={5}
+          cursor={'pointer'}
+          onClick={() => back()}
+        />
+        <Heading size={'2xl'} color={'orange'}>
+          {slugProduct ? 'Update Product' : 'Create Product'}
+        </Heading>
+      </Flex>
       <Divider
         my="5"
         borderColor="gray.300"

@@ -54,7 +54,7 @@ export default function TableIncoming({ incomingMutation }: props) {
         ) : (
           <Tr>
             <Td colSpan={5} textAlign={'center'}>
-              No data available
+              No data found
             </Td>
           </Tr>
         )}

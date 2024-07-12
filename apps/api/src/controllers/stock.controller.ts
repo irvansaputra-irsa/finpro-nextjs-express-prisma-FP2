@@ -90,8 +90,17 @@ export class StockController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
+      const { _page, _limit, _search } = req.query;
+      const page = Number(_page) || null;
+      const limit = Number(_limit) || null;
+      const search = _search?.toString() || null;
+      const user = req?.user;
       const data = await this.stockService.fetchProductNotAddedYetService(
         Number(id),
+        user,
+        page,
+        limit,
+        search,
       );
 
       res.status(200).json({

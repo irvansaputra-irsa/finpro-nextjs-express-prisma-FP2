@@ -1,11 +1,11 @@
 import multer from 'multer';
-import path from 'path';
+import path, { join } from 'path';
 import { Service } from 'typedi';
 import { Request } from 'express';
 import { UploadedFile } from '@/interfaces/uploadTransaction.interfaces';
-
+const defaultDir = join(__dirname, '../public');
 const storage = multer.diskStorage({
-  destination: './uploads/',
+  destination: defaultDir + '/uploads',
   filename: (req, file, cb) => {
     cb(
       null,

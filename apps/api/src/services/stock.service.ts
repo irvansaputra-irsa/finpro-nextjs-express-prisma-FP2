@@ -5,6 +5,7 @@ import {
   addStock,
   removeStock,
 } from '@/interfaces/stock.interface';
+import { IfetchProductNotAddedYet } from '@/interfaces/warehouseStock.interface';
 import { ProductQuery } from '@/queries/product.query';
 import { StockQuery } from '@/queries/stock.query';
 import { WarehouseQuery } from '@/queries/warehouse.query';
@@ -71,7 +72,7 @@ export class StockService {
     try {
       // 1. cek di WAREHOUSE admin tsb atau bukan
       // super admin trabas aja
-      if (user?.role === 'admin' && restricts) {
+      if (user?.role?.toLowerCase() === 'admin' && restricts) {
         const warehouse = await this.warehouseQuery.findWarehouseByUserQuery(
           user?.id,
         );
@@ -91,13 +92,30 @@ export class StockService {
   };
 
   public fetchProductNotAddedYetService = async (
-    id: number,
-  ): Promise<Book[]> => {
+    warehouseId: number,
+    user: User,
+    page: number,
+    limit: number,
+    search: string,
+  ): Promise<IfetchProductNotAddedYet> => {
     try {
       // 1. cek di WAREHOUSE admin tsb atau bukan
       // super admin trabas aja
+      if (user?.role?.toLowerCase() === 'admin') {
+        const warehouse = await this.warehouseQuery.findWarehouseByUserQuery(
+          user?.id,
+        );
+        if (warehouse?.id !== warehouseId) {
+          throw new HttpException(403, 'Unauthorized');
+        }
+      }
       // 2. baru insert qtynya sesuai warehouse id dan product id
-      const data = await this.stockQuery.fetchProductNotAddedYetQuery(id);
+      const data = await this.stockQuery.fetchProductNotAddedYetQuery(
+        warehouseId,
+        page,
+        limit,
+        search,
+      );
       return data;
     } catch (error) {
       throw error;

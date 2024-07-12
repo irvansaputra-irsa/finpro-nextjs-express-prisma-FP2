@@ -1,6 +1,10 @@
+import { IUser } from '@/context/Auth';
 import { product } from '@/interface/product.interface';
 import { parseCurrency, parseDateTime } from '@/utils/convert';
+import { checkSuperAdmin } from '@/utils/indicator';
 import {
+  Box,
+  Button,
   Flex,
   Icon,
   Table,
@@ -13,25 +17,53 @@ import {
 } from '@chakra-ui/react';
 import { FaEdit } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
-
+import {
+  TiArrowUnsorted,
+  TiArrowSortedDown,
+  TiArrowSortedUp,
+} from 'react-icons/ti';
 interface propsVal {
+  user: IUser | null;
   productList: product[];
   handleDetailProduct: (bookName: string) => void;
   handleDeleteProduct: (id: number) => void;
+  handleSort: (column: string) => void;
+  sortColumn: string;
+  order: 'ASC' | 'DESC' | 'UNSORT';
 }
 
 export default function ProductTable({
+  user,
   productList,
   handleDetailProduct,
   handleDeleteProduct,
+  handleSort,
+  sortColumn,
+  order,
 }: propsVal) {
+  const allowSort = (column: string) => {
+    return (
+      <Box cursor={'pointer'} onClick={() => handleSort(column)}>
+        {sortColumn !== column || order === 'UNSORT' ? (
+          <TiArrowUnsorted size={25} />
+        ) : order === 'ASC' ? (
+          <TiArrowSortedUp size={25} />
+        ) : (
+          <TiArrowSortedDown size={25} />
+        )}
+      </Box>
+    );
+  };
   return (
     <TableContainer>
-      <Table variant="simple" size={'lg'}>
+      <Table layout="fixed" variant="simple" size={'lg'}>
         <Thead>
           <Tr>
             <Th fontSize={'lg'} fontWeight={'bold'}>
-              Name
+              <Flex justifyContent={'start'} gap={3} alignItems={'center'}>
+                {allowSort('book_name')}
+                <Box>Book Name</Box>
+              </Flex>
             </Th>
             <Th fontSize={'lg'} fontWeight={'bold'}>
               Category
@@ -40,40 +72,51 @@ export default function ProductTable({
               Author
             </Th>
             <Th fontSize={'lg'} fontWeight={'bold'} isNumeric>
-              Price
+              <Flex justifyContent={'end'} gap={3} alignItems={'center'}>
+                {allowSort('book_price')}
+                <Box>Price</Box>
+              </Flex>
             </Th>
             <Th fontSize={'lg'} fontWeight={'bold'} isNumeric>
-              Created Date
+              <Flex justifyContent={'end'} gap={3} alignItems={'center'}>
+                {allowSort('created_at')}
+                <Box>Created At</Box>
+              </Flex>
             </Th>
-            <Th fontSize={'lg'} fontWeight={'bold'} isNumeric>
-              Action
-            </Th>
+            {checkSuperAdmin(user) ? (
+              <Th fontSize={'lg'} fontWeight={'bold'}>
+                Action
+              </Th>
+            ) : (
+              ''
+            )}
           </Tr>
         </Thead>
         <Tbody>
-          {productList.length
-            ? productList?.map(
-                (
-                  {
-                    id,
-                    book_name,
-                    book_price,
-                    bookCategory,
-                    book_author,
-                    created_at,
-                  },
-                  idx: number,
-                ) => (
-                  <Tr key={idx}>
-                    <Td maxW={'300px'} overflow={'hidden'}>
-                      {book_name}
-                    </Td>
-                    <Td>{bookCategory?.book_category_name}</Td>
-                    <Td>{book_author}</Td>
-                    <Td isNumeric> {parseCurrency(book_price)}</Td>
-                    <Td isNumeric> {parseDateTime(created_at)}</Td>
-                    <Td isNumeric>
-                      <Flex justifyContent={'end'}>
+          {productList.length ? (
+            productList?.map(
+              (
+                {
+                  id,
+                  book_name,
+                  book_price,
+                  bookCategory,
+                  book_author,
+                  created_at,
+                },
+                idx: number,
+              ) => (
+                <Tr key={idx}>
+                  <Td maxW={'300px'} overflow={'hidden'}>
+                    {book_name}
+                  </Td>
+                  <Td>{bookCategory?.book_category_name}</Td>
+                  <Td>{book_author}</Td>
+                  <Td isNumeric> {parseCurrency(book_price)}</Td>
+                  <Td isNumeric> {parseDateTime(created_at)}</Td>
+                  {checkSuperAdmin(user) ? (
+                    <Td>
+                      <Flex justifyContent={'start'}>
                         <Icon
                           cursor={'pointer'}
                           as={FaEdit}
@@ -91,10 +134,19 @@ export default function ProductTable({
                         />
                       </Flex>
                     </Td>
-                  </Tr>
-                ),
-              )
-            : null}
+                  ) : (
+                    ''
+                  )}
+                </Tr>
+              ),
+            )
+          ) : (
+            <Tr>
+              <Td textAlign={'center'} colSpan={100}>
+                No data found
+              </Td>
+            </Tr>
+          )}
         </Tbody>
       </Table>
     </TableContainer>

@@ -51,6 +51,11 @@ export default function Navbar() {
               Cart
             </Button>
           </Link>
+          <Link href="/transaction-history">
+            <Button w="full" variant="ghost">
+              Transaction
+            </Button>
+          </Link>
           <Link href="/login" onClick={() => handleLogout()}>
             <Button w="full" variant="ghost">
               Log out

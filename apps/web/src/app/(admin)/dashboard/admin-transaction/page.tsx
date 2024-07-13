@@ -226,12 +226,24 @@ const AdminTransactionPage = () => {
         <Heading as="h1" size="xl" mb={4} borderBottom="2px solid">
           Admin Transaction History
         </Heading>
-        <Input
-          type="date"
-          placeholder="Search by date"
-          value={searchDate}
-          onChange={handleSearchChange}
-        />
+        <Flex>
+          <Input
+            type="date"
+            placeholder="Search by date"
+            value={searchDate}
+            onChange={handleSearchChange}
+            minW="60vw"
+          />
+          <Button
+            ml={2}
+            colorScheme="gray"
+            variant="outline"
+            onClick={fetchTransactions}
+          >
+            ⟳
+          </Button>
+        </Flex>
+
         <Table variant="simple">
           <Thead>
             <Tr>

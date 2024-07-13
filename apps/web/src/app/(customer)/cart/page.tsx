@@ -439,7 +439,7 @@ export default function CartPage() {
             colorScheme="orange"
             size="lg"
             w="full"
-            display={{ sm: 'none', md: 'none', lg: 'block' }}
+            display={{ base: 'none', lg: 'block' }}
             onClick={async () => {
               if (checkIsCartEmpty()) {
                 toast({
@@ -519,6 +519,44 @@ export default function CartPage() {
               </Stack>
             </RadioGroup>
           </Box>
+
+          <Button
+            mt={4}
+            colorScheme="orange"
+            size="lg"
+            w="full"
+            display={{ base: 'block', lg: 'none' }}
+            onClick={async () => {
+              if (checkIsCartEmpty()) {
+                toast({
+                  title: 'Cart is empty',
+                  description:
+                    'Please add items to your cart before proceeding to payment.',
+                  status: 'error',
+                  duration: 5000,
+                  isClosable: true,
+                });
+              } else {
+                const isStockSufficient = await checkStockAvailability();
+
+                if (!isStockSufficient) {
+                  toast({
+                    title: 'Insufficient stock',
+                    description:
+                      'One or more items in your cart are out of stock.',
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                  return;
+                }
+
+                handlePaymentClick();
+              }
+            }}
+          >
+            Lanjut ke Pembayaran
+          </Button>
         </Box>
       </Flex>
     </Box>

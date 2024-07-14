@@ -37,6 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, warehouseId }) => {
       rounded="lg"
       overflow="hidden"
       mx="auto"
+      py={5}
     >
       <Image w="full" h={56} fit="contain" src={imgUrl} alt="avatar" />
 

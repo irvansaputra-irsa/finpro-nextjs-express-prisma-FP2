@@ -4,7 +4,6 @@ import { parseCurrency, parseDateTime } from '@/utils/convert';
 import { checkSuperAdmin } from '@/utils/indicator';
 import {
   Box,
-  Button,
   Flex,
   Icon,
   Table,
@@ -14,6 +13,7 @@ import {
   Th,
   Thead,
   Tr,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { FaEdit } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
@@ -22,11 +22,12 @@ import {
   TiArrowSortedDown,
   TiArrowSortedUp,
 } from 'react-icons/ti';
+import DialogDelete from './dialogDelete';
+import { useState } from 'react';
 interface propsVal {
   user: IUser | null;
   productList: product[];
   handleDetailProduct: (bookName: string) => void;
-  handleDeleteProduct: (id: number) => void;
   handleSort: (column: string) => void;
   sortColumn: string;
   order: 'ASC' | 'DESC' | 'UNSORT';
@@ -36,11 +37,16 @@ export default function ProductTable({
   user,
   productList,
   handleDetailProduct,
-  handleDeleteProduct,
   handleSort,
   sortColumn,
   order,
 }: propsVal) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [idCurrent, setIdCurrent] = useState(0);
+  const handleDeleteProduct = (id: number) => {
+    onOpen();
+    setIdCurrent(id);
+  };
   const allowSort = (column: string) => {
     return (
       <Box cursor={'pointer'} onClick={() => handleSort(column)}>
@@ -56,7 +62,11 @@ export default function ProductTable({
   };
   return (
     <TableContainer>
-      <Table layout="fixed" variant="simple" size={'lg'}>
+      <Table
+        layout={{ base: 'auto', '2xl': 'fixed' }}
+        variant="simple"
+        size={'lg'}
+      >
         <Thead>
           <Tr>
             <Th fontSize={'lg'} fontWeight={'bold'}>
@@ -149,6 +159,11 @@ export default function ProductTable({
           )}
         </Tbody>
       </Table>
+      <DialogDelete
+        isOpenDialog={isOpen}
+        onCloseDialog={onClose}
+        currentIdModal={idCurrent}
+      />
     </TableContainer>
   );
 }

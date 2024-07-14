@@ -70,14 +70,9 @@ export default function ProductList() {
     sortColumn,
     orderBy,
   );
-  const { mutate: mutateDelete } = useProductDeleteMutation();
   const { replace, push } = useRouter();
   const productList: product[] = data?.data?.data?.data || [];
   const totalPages = data?.data.data.totalPages;
-
-  const handleDeleteProduct = (id: number) => {
-    mutateDelete(id);
-  };
 
   const handleClickButton = (type: string): void => {
     if (type === 'next') {
@@ -162,7 +157,6 @@ export default function ProductList() {
         </Flex>
         <ProductTable
           user={user}
-          handleDeleteProduct={handleDeleteProduct}
           handleDetailProduct={handleDetailProduct}
           handleSort={handleSort}
           productList={productList}

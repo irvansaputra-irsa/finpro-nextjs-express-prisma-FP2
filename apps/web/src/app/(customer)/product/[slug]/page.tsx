@@ -44,7 +44,6 @@ export default function ProductDetailPage({
   const [simpleDesc, setSimpleDesc] = useState<boolean>(true);
   const { data: books } = useProductDetailCustomer(bookName);
   const bookData: product = books?.data.data || undefined;
-  console.log('🚀 ~ bookData:', bookData);
   const bookImage = bookData?.BookImage || [];
   const bookStock = bookData?.current_stock || 0;
   const [mainImage, setMainImage] = useState<string>(bookImage[0]?.book_image);
@@ -157,9 +156,9 @@ export default function ProductDetailPage({
             <Heading size={'md'} mb={3}>
               Book Description
             </Heading>
-            <Text textAlign={'justify'} noOfLines={simpleDesc ? 4 : undefined}>
+            <Box textAlign={'justify'} noOfLines={simpleDesc ? 4 : undefined}>
               {convertEscapeParagraph(bookData?.book_description)}
-            </Text>
+            </Box>
             <Flex justifyContent={'end'} cursor={'pointer'}>
               {simpleDesc ? (
                 <Text onClick={handleToggleDesc} as={'b'}>

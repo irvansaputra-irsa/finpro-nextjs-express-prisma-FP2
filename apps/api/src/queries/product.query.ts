@@ -244,7 +244,7 @@ export class ProductQuery {
         },
         where: {
           book: {
-            book_name,
+            book_name: bookName,
           },
         },
       });

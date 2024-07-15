@@ -525,6 +525,7 @@ export default function InnerForm(props: any) {
                         id="file"
                         name="file"
                         type="file"
+                        accept=".jpg, .jpeg, .png, .gif"
                         onChange={uploadImg}
                       />
                     </VisuallyHidden>

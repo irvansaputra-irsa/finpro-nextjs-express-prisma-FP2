@@ -310,6 +310,7 @@ export class ReportQuery {
         },
         distinct: ['warehouseStockId'],
       });
+      console.log('🚀 ~ ReportQuery ~ finalHistory:', finalHistory);
       const totalLastStock = finalHistory.reduce((item, currentItem) => {
         return item + currentItem.newStock;
       }, 0);

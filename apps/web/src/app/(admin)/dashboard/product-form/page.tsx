@@ -195,9 +195,9 @@ export default function ProductForm() {
       file,
     }) {
       //filter non-ascii character
-      bookName = bookName.replace(/[^\x00-\x7F]/g, '');
+      const cleanerBookName = bookName.replaceAll(/[^\x00-\x7F]|[/]|[-]/g, ' ');
       submitData({
-        bookName,
+        bookName: cleanerBookName,
         bookDescription,
         bookAuthor,
         bookPublisher,

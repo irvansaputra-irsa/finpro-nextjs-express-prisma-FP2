@@ -27,6 +27,11 @@ import { MutationRouter } from './routers/mutation.router';
 import { TransactionRouter } from './routers/transaction.router';
 import { ReportRouter } from './routers/report.router';
 
+import { CronJob } from 'cron';
+import fetch from 'node-fetch';
+
+require('dotenv').config();
+
 export default class App {
   private app: Express;
 
@@ -35,6 +40,7 @@ export default class App {
     this.configure();
     this.routes();
     this.handleError();
+    this.startCronJob();
   }
 
   private configure(): void {
@@ -96,6 +102,31 @@ export default class App {
     this.app.use('/api/mutation', mutationRouter.getRouter());
     this.app.use('/api/transaction', transactionRouter.getRouter());
     this.app.use('/api/report', reportRouter.getRouter());
+  }
+
+  private startCronJob(): void {
+    const job = new CronJob(
+      '0 * * * * *',
+      async () => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_API_URL}/transaction/cron`,
+            {
+              method: 'POST',
+            },
+          );
+          const message = await response.json();
+          console.log(message);
+        } catch (e) {
+          console.error(e);
+        }
+      },
+      null,
+      true,
+      'Asia/Jakarta',
+    );
+    job.start();
+    console.log('CRON RUNNING...');
   }
 
   public start(): void {
